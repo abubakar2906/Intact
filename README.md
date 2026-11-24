@@ -40,6 +40,23 @@ npm run bench -- --models anthropic/<model>,openai/<model>,google/<model> --samp
 
 Use the exact model ids from OpenRouter's model list. Each run saves every reply, every extracted answer and a `summary.md` under `runs/<time>/`.
 
+### Running it for free
+
+- **OpenRouter's free models.** Use ids ending in `:free`. They're rate limited (check OpenRouter's current daily limit), so keep runs small and use `--concurrency 1`.
+- **Any other OpenAI-compatible service.** Point Intact at it with two variables:
+  ```sh
+  export INTACT_BASE_URL=https://api.groq.com/openai/v1    # Groq's free tier
+  export INTACT_API_KEY=...
+  npm run bench -- --models <groq model id> --samples 5 --concurrency 1
+  ```
+  A local Ollama works the same way with `INTACT_BASE_URL=http://localhost:11434/v1` and no key.
+- **By hand, with free chat apps.** Print the prompt, paste it into ChatGPT, Claude or Gemini, save each whole reply to a file, and grade the files:
+  ```sh
+  npm run prompt -- paystack                 # the exact prompt to paste
+  npm run grade -- paystack replies/*.md     # PASS or FAIL, and which checks failed
+  ```
+  Start a new chat for every sample, so earlier answers don't influence the next one.
+
 ## Safety
 
 Model-written code runs on your machine. Each answer runs in its own Node process with the permission model on: it can read only its own file and the harness, with no file writes and no child processes, and it's stopped after 10 seconds. Node's permission model does not block the network, so run unfamiliar models inside a container. Only test secrets are used. Never point this at live keys.
