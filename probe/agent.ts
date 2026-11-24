@@ -37,17 +37,27 @@ export async function availableModels(): Promise<string[] | null> {
 
 // A refusal for asking too fast (429) is waited out, never counted as a failed run.
 // A garbled tool call (the service can't read what the model wrote) is retried: it's one bad draw, not the model's answer.
-// Server errors give up after 4 tries.
+// Server errors and dropped connections give up after 6 tries.
 async function chat(model: string, messages: unknown[]) {
   if (!KEY && !LOCAL) throw new Error('Set OPENROUTER_API_KEY, or INTACT_BASE_URL and INTACT_API_KEY for another service.');
   let serverErrors = 0, refusals = 0, garbled = 0, last = '';
   while (true) {
     await waitForRoom(model, log);
-    const res = await fetch(`${BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: { ...(KEY ? { authorization: `Bearer ${KEY}` } : {}), 'content-type': 'application/json', 'x-title': 'Intact' },
-      body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto' }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: { ...(KEY ? { authorization: `Bearer ${KEY}` } : {}), 'content-type': 'application/json', 'x-title': 'Intact' },
+        body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto' }),
+      });
+    } catch (e) {
+      // The request never reached the service: a dropped connection or flaky network. Treat it like a server error.
+      last = `network: ${String((e as Error).cause ?? (e as Error).message ?? e).slice(0, 150)}`;
+      if (++serverErrors >= 6) throw new Error(`gave up after 6 tries (${last})`);
+      log(`${model}: connection dropped, trying again`);
+      await sleep(2000 * 2 ** Math.min(serverErrors, 4));
+      continue;
+    }
     if (res.status === 429) {
       await res.text();
       const wait = refusalWait(model, res.headers, refusals++);
@@ -57,7 +67,7 @@ async function chat(model: string, messages: unknown[]) {
     if (res.status >= 500) {
       noteReply(model, res.headers, null);
       last = `${res.status} ${(await res.text()).slice(0, 200)}`;
-      if (++serverErrors >= 4) throw new Error(`gave up after 4 server errors (${last})`);
+      if (++serverErrors >= 6) throw new Error(`gave up after 6 tries (${last})`);
       await sleep(2000 * 2 ** serverErrors);
       continue;
     }
