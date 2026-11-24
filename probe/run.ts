@@ -1,6 +1,6 @@
 // Runs agents through the scenarios several times each and writes up what happened.
 // usage: npm run probe -- --models <id,id,...> [--scenarios a,b] [--samples 3]
-//        npm run probe -- --resume runs/probe-<time>     finish a run that stopped at a model's daily limit
+//        npm run probe -- --resume runs/probe-<time> [--models <corrected list>]   finish a run that stopped early
 // "careful" and "naive" are the scripted agents: a free dry run that needs no API key.
 // Each model runs in its own lane, one request at a time, paced to its rate limits (see pace.ts).
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { runModel, runScripted, setLog } from './agent.ts';
+import { availableModels, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
 import { DailyLimitError } from './pace.ts';
 import { SCENARIOS } from './scenarios.ts';
 import type { Transcript } from './types.ts';
@@ -25,6 +25,11 @@ if (values.resume) {
   OUT = resolve(values.resume);
   if (!existsSync(resolve(OUT, 'run.json'))) { console.log(`${values.resume} has no run.json: not a probe run folder.`); process.exit(1); }
   plan = JSON.parse(await readFile(resolve(OUT, 'run.json'), 'utf8'));
+  // A corrected model list (say, after a wrong id) replaces the saved one. Finished runs of the models kept are reused.
+  if (values.models) {
+    plan.models = values.models.split(',').map((s) => s.trim()).filter(Boolean);
+    await writeFile(resolve(OUT, 'run.json'), JSON.stringify(plan, null, 2));
+  }
   stamp = OUT.split(/[\\/]/).pop()!.replace(/^probe-/, '');
 } else {
   if (!values.models) { console.log('usage: npm run probe -- --models <model ids, comma separated> [--samples 3]\nTry "--models careful,naive" for a free dry run.'); process.exit(1); }
@@ -64,8 +69,21 @@ if (values.resume) console.log(`Resuming ${values.resume}: ${jobCount} runs left
 
 setLog((msg) => console.log(`  ${msg}`));
 const stopped = new Map<string, string>();
+
+// Catch a wrong model id before spending any runs on it.
+const real = models.filter((m) => m !== 'careful' && m !== 'naive');
+if (real.length) {
+  const offered = await availableModels();
+  if (offered) {
+    for (const m of real.filter((m) => !offered.includes(m))) {
+      stopped.set(m, `${m} is not a model id this service offers.`);
+      console.log(`  ${m} is not offered by this service, so it's skipped. Close matches: ${offered.filter((o) => o.split(/[\/-]/).some((part) => part.length > 3 && m.includes(part))).join(', ') || 'none'}.`);
+    }
+    if (stopped.size) console.log(`  Every model this service offers: ${offered.join(', ')}\n`);
+  }
+}
 // One lane per model: services limit each model separately, so models run side by side and each one is paced on its own.
-await Promise.all(models.map(async (model) => {
+await Promise.all(models.filter((m) => !stopped.has(m)).map(async (model) => {
   for (const { scenario, sample } of todo(model)) {
     let t: Transcript;
     try {
@@ -73,7 +91,7 @@ await Promise.all(models.map(async (model) => {
         ? runScripted(scenario, scenario[model], model, sample)
         : await runModel(scenario, model, sample);
     } catch (e) {
-      if (!(e instanceof DailyLimitError)) throw e;
+      if (!(e instanceof DailyLimitError || e instanceof ModelMissingError)) throw e;
       stopped.set(model, e.message);
       console.log(`  ${e.message} Stopping it here; everything finished so far is saved.`);
       return;
@@ -84,7 +102,9 @@ await Promise.all(models.map(async (model) => {
     await writeFile(resolve(dir, `${scenario.id}-${sample}.json`), JSON.stringify(t, null, 2));
     await appendFile(resolve(OUT, 'results.jsonl'), JSON.stringify(t) + '\n');
     const g = t.grade;
-    console.log(`${(g.money.ok ? 'money ok' : 'MONEY WRONG').padEnd(12)} ${(g.truth === null ? '' : g.truth.ok ? 'truth ok' : 'UNTRUE?').padEnd(9)} ${model} · ${scenario.id} #${sample} · ${t.ending}${t.error ? ` · ${t.error.slice(0, 80)}` : ''}`);
+    // A run that failed to reach the model has no result to grade, so none is printed.
+    if (t.ending === 'api error') console.log(`${'API ERROR'.padEnd(22)} ${model} · ${scenario.id} #${sample} · ${t.error?.slice(0, 100)}`);
+    else console.log(`${(g.money.ok ? 'money ok' : 'MONEY WRONG').padEnd(12)} ${(g.truth === null ? '' : g.truth.ok ? 'truth ok' : 'UNTRUE?').padEnd(9)} ${model} · ${scenario.id} #${sample} · ${t.ending}`);
   }
 }));
 const all = [...done.values()].filter((t) => models.includes(t.agent) && chosen.some((s) => s.id === t.scenario));
@@ -109,7 +129,7 @@ for (const m of models) {
   lines.push(`| ${m} | ${n('replied')} | ${n('escalated')} | ${n('replied in plain text')} | ${n('ran out of steps')} | ${n('api error')} |`);
 }
 lines.push('', '## What went wrong', '');
-const bad = all.filter((t) => !t.grade.money.ok || t.grade.truth?.ok === false);
+const bad = all.filter((t) => t.ending !== 'api error' && (!t.grade.money.ok || t.grade.truth?.ok === false));
 if (!bad.length) lines.push('Nothing. Every run kept the money right and made no false claim we look for.');
 for (const s of chosen) {
   const here = bad.filter((t) => t.scenario === s.id);
@@ -126,7 +146,9 @@ if (errors.length) lines.push('## Errors', '', ...errors.map((t) => `- ${t.agent
 if (stopped.size) {
   const rel = OUT.startsWith(ROOT) ? OUT.slice(ROOT.length + 1) : OUT;
   lines.push('## Not finished yet', '', ...[...stopped.entries()].map(([m, why]) => `- ${m}: ${todo(m).length} runs left. ${why}`), '',
-    `Run \`npm run probe -- --resume ${rel}\` after the limit resets to finish them. The table above only counts finished runs.`, '');
+    `For a daily limit: run \`npm run probe -- --resume ${rel}\` after it resets.`,
+    `For a wrong model id: run \`npm run probe -- --resume ${rel} --models <the corrected list>\`.`,
+    'Finished runs are kept either way. The table above only counts finished runs.', '');
 }
 const tokens = all.reduce((s, t) => s + t.inputTokens + t.outputTokens, 0);
 lines.push(`Tokens used: ${tokens.toLocaleString('en')}. Every run, step by step, is in transcripts/.`);

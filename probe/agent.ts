@@ -16,10 +16,31 @@ const BASE_URL = (process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1')
 const KEY = process.env.INTACT_API_KEY ?? process.env.OPENROUTER_API_KEY;
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE_URL);
 
-// A refusal for asking too fast (429) is waited out, never counted as a failed run. Only server errors give up, after 4 tries.
+// The model id isn't on this service, or this key can't use it. Stops that model instead of failing every run.
+export class ModelMissingError extends Error {
+  model: string;
+  constructor(model: string, detail: string) {
+    super(`${model} is not available on ${BASE_URL} (${detail}). Check the model id.`);
+    this.model = model;
+  }
+}
+
+// The model ids this service offers, or null if it doesn't say. Used to catch a wrong id before any run starts.
+export async function availableModels(): Promise<string[] | null> {
+  try {
+    const res = await fetch(`${BASE_URL}/models`, { headers: KEY ? { authorization: `Bearer ${KEY}` } : {} });
+    if (!res.ok) return null;
+    const body = await res.json() as any;
+    return Array.isArray(body.data) ? body.data.map((m: any) => String(m.id)) : null;
+  } catch { return null; }
+}
+
+// A refusal for asking too fast (429) is waited out, never counted as a failed run.
+// A garbled tool call (the service can't read what the model wrote) is retried: it's one bad draw, not the model's answer.
+// Server errors give up after 4 tries.
 async function chat(model: string, messages: unknown[]) {
   if (!KEY && !LOCAL) throw new Error('Set OPENROUTER_API_KEY, or INTACT_BASE_URL and INTACT_API_KEY for another service.');
-  let serverErrors = 0, refusals = 0, last = '';
+  let serverErrors = 0, refusals = 0, garbled = 0, last = '';
   while (true) {
     await waitForRoom(model, log);
     const res = await fetch(`${BASE_URL}/chat/completions`, {
@@ -40,9 +61,13 @@ async function chat(model: string, messages: unknown[]) {
       await sleep(2000 * 2 ** serverErrors);
       continue;
     }
-    const body = await res.json() as any;
+    const body = await res.json().catch(() => ({})) as any;
     noteReply(model, res.headers, body.usage?.total_tokens ?? null);
-    if (!res.ok || body.error) throw new Error(`${res.status} ${JSON.stringify(body.error ?? body).slice(0, 300)}`);
+    const err = body.error ?? (res.ok ? null : body);
+    const text = JSON.stringify(err ?? '');
+    if (res.status === 404 || /model_not_found|does not exist|not have access/i.test(text)) throw new ModelMissingError(model, `${res.status}`);
+    if (res.status === 400 && /tool_use_failed|parsing failed|failed to parse|failed_generation/i.test(text) && garbled++ < 3) continue;
+    if (err) throw new Error(`${res.status} ${text.slice(0, 300)}${garbled > 3 ? ' (after 3 retries of a garbled tool call)' : ''}`);
     return { message: body.choices?.[0]?.message ?? {}, usage: body.usage ?? {} };
   }
 }
@@ -105,7 +130,7 @@ export async function runModel(scenario: Scenario, model: string, sample: number
     return finish(scenario, world, model, sample, steps, 'ran out of steps', null, { inputTokens, outputTokens });
   } catch (e) {
     // A daily limit isn't this run's fault: hand it up so the run stops this model and the job is done on resume.
-    if (e instanceof DailyLimitError) throw e;
+    if (e instanceof DailyLimitError || e instanceof ModelMissingError) throw e;
     return finish(scenario, world, model, sample, steps, 'api error', null, { error: String((e as Error).message ?? e), inputTokens, outputTokens });
   }
 }

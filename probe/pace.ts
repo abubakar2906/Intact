@@ -26,7 +26,7 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function formatWait(ms: number) {
   const m = Math.round(ms / 60_000);
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : m >= 1 ? `${m} minutes` : `${Math.ceil(ms / 1000)} seconds`;
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : m >= 1 ? `${m} minute${m === 1 ? '' : 's'}` : `${Math.ceil(ms / 1000)} seconds`;
 }
 
 // "7.66s", "2m59.56s", "1h2m", "350ms", or a plain number of seconds, into milliseconds.
