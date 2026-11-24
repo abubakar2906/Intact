@@ -1,0 +1,11 @@
+{
+  "name": "intact",
+  "private": true,
+  "description": "How reliably do AI models write payment integrations that actually work?",
+  "type": "module",
+  "engines": { "node": ">=22.6" },
+  "scripts": {
+    "selfcheck": "node --experimental-strip-types --no-warnings src/selfcheck.ts",
+    "bench": "node --experimental-strip-types --no-warnings src/run.ts"
+  }
+}
