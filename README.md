@@ -49,7 +49,13 @@ $env:INTACT_API_KEY = "your-groq-key"
 npm run probe -- --models <model id>,<model id> --samples 3
 ```
 
-On a Mac or Linux, use `export INTACT_BASE_URL=...` instead. OpenRouter is the default if you only set `OPENROUTER_API_KEY`. Keep `--concurrency 1` on free tiers. Results, a summary and every run step by step are saved under `runs/`.
+On a Mac or Linux, use `export INTACT_BASE_URL=...` instead. OpenRouter is the default if you only set `OPENROUTER_API_KEY`. Results, a summary and every run step by step are saved under `runs/`.
+
+**Rate limits are handled for you.** Each model runs in its own lane, and Intact reads the rate-limit headers on every reply: when a model's allowance is nearly used up, it waits for the refill before asking again. If a request is refused anyway, it waits as long as the service says and carries on; a refusal never counts against a model. The one limit waiting can't fix is a daily cap. When a model hits it, Intact stops that model, keeps every finished run, and tells you the command to finish later:
+
+```sh
+npm run probe -- --resume runs/probe-<time>
+```
 
 ## The code, in the order to read it
 

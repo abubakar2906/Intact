@@ -3,6 +3,7 @@
 import type { Ending, Step, ToolCall, Transcript } from './types.ts';
 import type { Scenario } from './scenarios.ts';
 import { World, TOOLS, LEDGERLINE_NOTES } from './world.ts';
+import { DailyLimitError, LONGEST_WAIT_MS, noteReply, refusalWait, sleep, waitForRoom } from './pace.ts';
 
 const MAX_STEPS = 12;
 
@@ -15,23 +16,39 @@ const BASE_URL = (process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1')
 const KEY = process.env.INTACT_API_KEY ?? process.env.OPENROUTER_API_KEY;
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE_URL);
 
+// A refusal for asking too fast (429) is waited out, never counted as a failed run. Only server errors give up, after 4 tries.
 async function chat(model: string, messages: unknown[]) {
   if (!KEY && !LOCAL) throw new Error('Set OPENROUTER_API_KEY, or INTACT_BASE_URL and INTACT_API_KEY for another service.');
-  let last = '';
-  for (let attempt = 0; attempt < 4; attempt++) {
-    if (attempt) await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+  let serverErrors = 0, refusals = 0, last = '';
+  while (true) {
+    await waitForRoom(model, log);
     const res = await fetch(`${BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: { ...(KEY ? { authorization: `Bearer ${KEY}` } : {}), 'content-type': 'application/json', 'x-title': 'Intact' },
       body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto' }),
     });
-    if (res.status === 429 || res.status >= 500) { last = `${res.status} ${await res.text()}`; continue; }
+    if (res.status === 429) {
+      await res.text();
+      const wait = refusalWait(model, res.headers, refusals++);
+      if (wait > LONGEST_WAIT_MS) throw new DailyLimitError(model, wait);
+      continue;
+    }
+    if (res.status >= 500) {
+      noteReply(model, res.headers, null);
+      last = `${res.status} ${(await res.text()).slice(0, 200)}`;
+      if (++serverErrors >= 4) throw new Error(`gave up after 4 server errors (${last})`);
+      await sleep(2000 * 2 ** serverErrors);
+      continue;
+    }
     const body = await res.json() as any;
+    noteReply(model, res.headers, body.usage?.total_tokens ?? null);
     if (!res.ok || body.error) throw new Error(`${res.status} ${JSON.stringify(body.error ?? body).slice(0, 300)}`);
     return { message: body.choices?.[0]?.message ?? {}, usage: body.usage ?? {} };
   }
-  throw new Error(`gave up after retries (${last.slice(0, 200)})`);
 }
+
+let log: (msg: string) => void = (msg) => console.log(msg);
+export const setLog = (fn: (msg: string) => void) => { log = fn; };
 
 function finish(scenario: Scenario, world: World, agent: string, sample: number, steps: Step[], ending: Ending, reply: string | null, extra: Partial<Transcript> = {}): Transcript {
   return { scenario: scenario.id, agent, sample, ending, reply, steps, grade: scenario.grade(world, reply, ending), inputTokens: 0, outputTokens: 0, ...extra };
@@ -87,6 +104,8 @@ export async function runModel(scenario: Scenario, model: string, sample: number
     }
     return finish(scenario, world, model, sample, steps, 'ran out of steps', null, { inputTokens, outputTokens });
   } catch (e) {
+    // A daily limit isn't this run's fault: hand it up so the run stops this model and the job is done on resume.
+    if (e instanceof DailyLimitError) throw e;
     return finish(scenario, world, model, sample, steps, 'api error', null, { error: String((e as Error).message ?? e), inputTokens, outputTokens });
   }
 }
