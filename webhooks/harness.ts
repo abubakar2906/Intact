@@ -1,6 +1,6 @@
 // Runs one answer file against one provider's cases and prints the results as JSON.
 // It runs in its own process (see check.ts), so a model's code that hangs, crashes or misbehaves cannot take the benchmark down.
-// usage: node --experimental-strip-types src/harness.ts <provider> <absolute path to answer.ts>
+// usage: node --experimental-strip-types webhooks/harness.ts <provider> <absolute path to answer.ts>
 import { pathToFileURL } from 'node:url';
 import { providers } from './providers/index.ts';
 import type { CaseResult, HarnessOutput } from './types.ts';

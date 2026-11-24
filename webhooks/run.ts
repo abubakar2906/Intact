@@ -43,7 +43,7 @@ async function runOne({ model, provider, sample }: { model: string; provider: st
   await mkdir(base, { recursive: true });
   let text: string, servedBy = model, inputTokens = 0, outputTokens = 0;
   try {
-    if (model === 'reference') text = '```ts\n' + await readFile(resolve(ROOT, 'src/references', p.reference), 'utf8') + '```';
+    if (model === 'reference') text = '```ts\n' + await readFile(resolve(ROOT, 'webhooks/references', p.reference), 'utf8') + '```';
     else ({ text, servedBy, inputTokens, outputTokens } = await ask(model, prompt(p)));
   } catch (e) {
     return { model, servedBy, provider, sample, status: 'api error', error: String((e as Error).message ?? e) };

@@ -1,15 +1,17 @@
 {
   "name": "intact",
   "private": true,
-  "description": "How reliably do AI models write payment integrations that actually work?",
+  "description": "AI agents are starting to handle money. Intact checks they keep it intact.",
   "type": "module",
   "engines": {
     "node": ">=22.6"
   },
   "scripts": {
-    "selfcheck": "node --experimental-strip-types --no-warnings src/selfcheck.ts",
-    "bench": "node --experimental-strip-types --no-warnings src/run.ts",
-    "prompt": "node --experimental-strip-types --no-warnings src/grade.ts prompt",
-    "grade": "node --experimental-strip-types --no-warnings src/grade.ts grade"
+    "webhooks:selfcheck": "node --experimental-strip-types --no-warnings webhooks/selfcheck.ts",
+    "webhooks:bench": "node --experimental-strip-types --no-warnings webhooks/run.ts",
+    "webhooks:prompt": "node --experimental-strip-types --no-warnings webhooks/grade.ts prompt",
+    "webhooks:grade": "node --experimental-strip-types --no-warnings webhooks/grade.ts grade",
+    "probe": "node --experimental-strip-types --no-warnings probe/run.ts",
+    "probe:selfcheck": "node --experimental-strip-types --no-warnings probe/selfcheck.ts"
   }
 }

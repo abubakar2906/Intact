@@ -27,7 +27,7 @@ export type Provider = {
   // The moment the webhooks "arrive", in Unix seconds. The harness freezes the clock here.
   now: number;
   cases: () => Case[];
-  // Files under src/references/ that export a verify function. The reference must pass every case.
+  // Files under webhooks/references/ that export a verify function. The reference must pass every case.
   // Each broken version must fail at least the cases listed.
   reference: string;
   broken: { file: string; mustFail: string[] }[];
