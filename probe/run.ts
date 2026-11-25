@@ -116,7 +116,8 @@ if (real.length && jobCount > 0) {
       stopped.set(m, `${m} is not a model id this service offers.`);
       console.log(`  ${m} is not offered by this service, so it's skipped. Close matches: ${offered.filter((o) => o.split(/[\/-]/).some((part) => part.length > 3 && m.includes(part))).join(', ') || 'none'}.`);
     }
-    if (stopped.size) console.log(`  This service offers ${offered.length} models. To see them all, open ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/models in a browser.\n`);
+    if (stopped.size && offered.length <= 60) console.log(`  This service offers: ${offered.slice().sort().join(', ')}\n`);
+    else if (stopped.size) console.log(`  This service offers ${offered.length} models. To see them all, open ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/models in a browser.\n`);
   }
 }
 // One lane per model: services limit each model separately, so models run side by side and each one is paced on its own.
