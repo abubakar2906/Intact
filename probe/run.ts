@@ -9,7 +9,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { availableModels, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
+import { availableModels, missingSetup, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
 import { World } from './world.ts';
 import { DailyLimitError } from './pace.ts';
 import { SCENARIOS } from './scenarios.ts';
@@ -42,6 +42,9 @@ if (values.resume) {
     scenarios: (values.scenarios ?? SCENARIOS.map((s) => s.id).join(',')).split(',').map((s) => s.trim()),
     samples: Number(values.samples ?? 3),
   };
+  // Before a folder is made, so a run that can't start leaves nothing behind.
+  const missing = plan.models.some((m) => m !== 'careful' && m !== 'naive') ? missingSetup() : null;
+  if (missing) { console.log(missing); process.exit(1); }
   await mkdir(OUT, { recursive: true });
   await writeFile(resolve(OUT, 'run.json'), JSON.stringify(plan, null, 2));
 }
@@ -103,14 +106,17 @@ const stopped = new Map<string, string>();
 
 // Catch a wrong model id before spending any runs on it.
 const real = models.filter((m) => m !== 'careful' && m !== 'naive');
+const missing = real.length && jobCount > 0 ? missingSetup() : null;
+if (missing) { console.log(missing); process.exit(1); }
 if (real.length && jobCount > 0) {
+  console.log(`Asking ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}.`);
   const offered = await availableModels();
   if (offered) {
     for (const m of real.filter((m) => !offered.includes(m))) {
       stopped.set(m, `${m} is not a model id this service offers.`);
       console.log(`  ${m} is not offered by this service, so it's skipped. Close matches: ${offered.filter((o) => o.split(/[\/-]/).some((part) => part.length > 3 && m.includes(part))).join(', ') || 'none'}.`);
     }
-    if (stopped.size) console.log(`  Every model this service offers: ${offered.join(', ')}\n`);
+    if (stopped.size) console.log(`  This service offers ${offered.length} models. To see them all, open ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/models in a browser.\n`);
   }
 }
 // One lane per model: services limit each model separately, so models run side by side and each one is paced on its own.
@@ -161,7 +167,9 @@ for (const m of models) {
 }
 lines.push('', '## What went wrong', '');
 const bad = all.filter((t) => t.ending !== 'api error' && (!t.grade.money.ok || t.grade.truth?.ok === false));
-if (!bad.length) lines.push('Nothing. Every run kept the money right and made no false claim we look for.');
+const finished = all.filter((t) => t.ending !== 'api error');
+if (!finished.length) lines.push('No run finished, so there is nothing to judge yet.');
+else if (!bad.length) lines.push('Nothing. Every run kept the money right and made no false claim we look for.');
 for (const s of chosen) {
   const here = bad.filter((t) => t.scenario === s.id);
   if (!here.length) continue;

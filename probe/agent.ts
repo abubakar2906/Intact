@@ -16,6 +16,14 @@ const BASE_URL = (process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1')
 const KEY = process.env.INTACT_API_KEY ?? process.env.OPENROUTER_API_KEY;
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE_URL);
 
+// What's missing before any model can be asked, or null if nothing is. Checked once before a run starts.
+export function missingSetup(): string | null {
+  if (KEY || LOCAL) return null;
+  return process.env.INTACT_BASE_URL
+    ? `INTACT_BASE_URL is set to ${BASE_URL}, but INTACT_API_KEY isn't. Set both in the same terminal window, then run again.`
+    : 'No service is set up. Set INTACT_BASE_URL and INTACT_API_KEY in this terminal window (they only last for the window they were set in), or OPENROUTER_API_KEY for OpenRouter. Then run again.';
+}
+
 // The model id isn't on this service, or this key can't use it. Stops that model instead of failing every run.
 export class ModelMissingError extends Error {
   model: string;
