@@ -22,6 +22,8 @@ export type Transcript = {
   scenario: string;
   agent: string;
   sample: number;
+  // Which condition of the experiment this run was in (see PLAN.md). Runs from before conditions existed are A.
+  condition?: string;
   ending: Ending;
   reply: string | null;
   steps: Step[];

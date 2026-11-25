@@ -1,27 +1,28 @@
 // Runs agents through the scenarios several times each and writes up what happened.
-// usage: npm run probe -- --models <id,id,...> [--scenarios a,b] [--samples 3]
+// usage: npm run probe -- --models <id,id,...> [--scenarios a,b] [--samples 3] [--conditions A,B,C,D] [--parallel 3]
 //        npm run probe -- --resume runs/probe-<time> [--models <corrected list>]   finish a run that stopped early
 //        npm run probe -- --resume runs/probe-<time> --rescore   grade finished runs again with the current grading. Calls no model.
 // "careful" and "naive" are the scripted agents: a free dry run that needs no API key.
-// Each model runs in its own lane, one request at a time, paced to its rate limits (see pace.ts).
+// Each model runs in its own lane, with up to --parallel tries at a time, paced to its rate limits (see pace.ts).
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { availableModels, missingSetup, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
-import { World } from './world.ts';
+import { availableModels, makeWorld, missingSetup, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
+import { CONDITIONS, parseConditions, type Condition } from './conditions.ts';
 import { DailyLimitError } from './pace.ts';
-import { SCENARIOS } from './scenarios.ts';
+import { SCENARIOS, type Scenario } from './scenarios.ts';
 import type { Transcript } from './types.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { values } = parseArgs({ options: {
   models: { type: 'string' }, scenarios: { type: 'string' }, samples: { type: 'string' }, resume: { type: 'string' }, rescore: { type: 'boolean' },
+  conditions: { type: 'string' }, parallel: { type: 'string' },
 } });
 
 // A run's settings are saved in run.json, so --resume carries on with exactly the same models, scenarios and samples.
-type Plan = { models: string[]; scenarios: string[]; samples: number };
+type Plan = { models: string[]; scenarios: string[]; samples: number; conditions?: Condition[] };
 let OUT: string, plan: Plan, stamp: string;
 if (values.resume) {
   OUT = resolve(values.resume);
@@ -41,6 +42,7 @@ if (values.resume) {
     models: values.models.split(',').map((s) => s.trim()).filter(Boolean),
     scenarios: (values.scenarios ?? SCENARIOS.map((s) => s.id).join(',')).split(',').map((s) => s.trim()),
     samples: Number(values.samples ?? 3),
+    conditions: parseConditions(values.conditions),
   };
   // Before a folder is made, so a run that can't start leaves nothing behind.
   const missing = plan.models.some((m) => m !== 'careful' && m !== 'naive') ? missingSetup() : null;
@@ -50,21 +52,30 @@ if (values.resume) {
 }
 
 const models = plan.models;
+const conditions: Condition[] = plan.conditions ?? ['A'];
 const chosen = plan.scenarios.map((id) => {
   const s = SCENARIOS.find((x) => x.id === id.trim());
   if (!s) { console.log(`unknown scenario "${id}". Known: ${SCENARIOS.map((x) => x.id).join(', ')}`); process.exit(1); }
   return s;
 });
 const samples = plan.samples;
+// Several tries of one model at once. Slow models (minutes per answer) finish several times sooner. A refusal for
+// asking too fast is still waited out, so a service that allows less only slows down, it doesn't fail.
+const parallel = Math.max(1, Number(values.parallel ?? 3));
 const slug = (m: string) => m.replace(/[^a-z0-9.-]+/gi, '_');
-const key = (agent: string, scenario: string, sample: number) => `${agent}|${scenario}|${sample}`;
+const conditionOf = (t: Transcript) => (t.condition ?? 'A') as Condition;
+const key = (agent: string, condition: string, scenario: string, sample: number) => `${agent}|${condition}|${scenario}|${sample}`;
+// Runs from before conditions existed keep their old file name.
+const fileFor = (t: { agent: string; scenario: string; sample: number; condition?: string }) =>
+  resolve(OUT, 'transcripts', slug(t.agent), `${t.scenario}${(t.condition ?? 'A') === 'A' ? '' : `-${t.condition}`}-${t.sample}.json`);
+const label = (c: Condition) => (conditions.length > 1 ? ` (${c})` : '');
 
 // Runs already finished in this folder are kept. A run that ended in an api error is tried again.
 const done = new Map<string, Transcript>();
 if (existsSync(resolve(OUT, 'results.jsonl'))) {
   for (const line of (await readFile(resolve(OUT, 'results.jsonl'), 'utf8')).split('\n').filter(Boolean)) {
     const t = JSON.parse(line) as Transcript;
-    done.set(key(t.agent, t.scenario, t.sample), t);
+    done.set(key(t.agent, conditionOf(t), t.scenario, t.sample), t);
   }
 }
 // Rescoring replays each run's tool calls on a fresh world and grades the result, so a fix to the grading or the world
@@ -79,8 +90,7 @@ if (values.rescore) {
     if (t.ending === 'api error') continue;
     const scenario = SCENARIOS.find((s) => s.id === t.scenario);
     if (!scenario) continue;
-    const world = new World();
-    scenario.setup(world);
+    const world = makeWorld(scenario, conditionOf(t));
     const differ: number[] = [];
     t.steps.forEach((step, i) => {
       if (step.kind !== 'tool') return;
@@ -90,14 +100,16 @@ if (values.rescore) {
     t.grade = scenario.grade(world, t.reply, t.ending);
     if (differ.length) t.grade.money.note += ` (replayed: the world now answers step ${differ.join(', ')} differently from what the agent saw, so read this run)`;
     if (JSON.stringify(t.grade) !== before) changed++;
-    await mkdir(resolve(OUT, 'transcripts', slug(t.agent)), { recursive: true });
-    await writeFile(resolve(OUT, 'transcripts', slug(t.agent), `${t.scenario}-${t.sample}.json`), JSON.stringify(t, null, 2));
+    await mkdir(dirname(fileFor(t)), { recursive: true });
+    await writeFile(fileFor(t), JSON.stringify(t, null, 2));
   }
   await writeFile(resolve(OUT, 'results.jsonl'), [...done.values()].map((t) => JSON.stringify(t)).join('\n') + '\n');
   console.log(`Rescored ${done.size} runs: ${changed} grades changed. The old grades are in results.before-rescore.jsonl.`);
 }
-const todo = (m: string) => chosen.flatMap((scenario) => Array.from({ length: samples }, (_, i) => ({ model: m, scenario, sample: i + 1 })))
-  .filter((j) => { const t = done.get(key(j.model, j.scenario.id, j.sample)); return !t || t.ending === 'api error'; });
+
+type Job = { model: string; condition: Condition; scenario: Scenario; sample: number };
+const todo = (m: string): Job[] => conditions.flatMap((condition) => chosen.flatMap((scenario) => Array.from({ length: samples }, (_, i) => ({ model: m, condition, scenario, sample: i + 1 }))))
+  .filter((j) => { const t = done.get(key(j.model, j.condition, j.scenario.id, j.sample)); return !t || t.ending === 'api error'; });
 const jobCount = models.reduce((n, m) => n + todo(m).length, 0);
 if (values.resume) console.log(`Resuming ${values.resume}: ${jobCount} runs left.`);
 
@@ -109,7 +121,7 @@ const real = models.filter((m) => m !== 'careful' && m !== 'naive');
 const missing = real.length && jobCount > 0 ? missingSetup() : null;
 if (missing) { console.log(missing); process.exit(1); }
 if (real.length && jobCount > 0) {
-  console.log(`Asking ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}.`);
+  console.log(`Asking ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}, ${parallel} tries at a time per model.`);
   const offered = await availableModels();
   if (offered) {
     for (const m of real.filter((m) => !offered.includes(m))) {
@@ -120,46 +132,55 @@ if (real.length && jobCount > 0) {
     else if (stopped.size) console.log(`  This service offers ${offered.length} models. To see them all, open ${(process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '')}/models in a browser.\n`);
   }
 }
-// One lane per model: services limit each model separately, so models run side by side and each one is paced on its own.
+
+async function runJob({ model, condition, scenario, sample }: Job) {
+  const t = model === 'careful' || model === 'naive'
+    ? runScripted(scenario, scenario[model], model, sample, condition)
+    : await runModel(scenario, model, sample, condition);
+  done.set(key(model, condition, scenario.id, sample), t);
+  await mkdir(dirname(fileFor(t)), { recursive: true });
+  await writeFile(fileFor(t), JSON.stringify(t, null, 2));
+  await appendFile(resolve(OUT, 'results.jsonl'), JSON.stringify(t) + '\n');
+  const g = t.grade;
+  const where = `${model} · ${scenario.id}${label(condition)} #${sample}`;
+  // A run that failed to reach the model has no result to grade, so none is printed.
+  if (t.ending === 'api error') console.log(`${'API ERROR'.padEnd(22)} ${where} · ${t.error?.slice(0, 100)}`);
+  else console.log(`${(g.money.ok ? 'money ok' : 'MONEY WRONG').padEnd(12)} ${(g.truth === null ? '' : g.truth.ok ? 'truth ok' : 'UNTRUE?').padEnd(9)} ${where} · ${t.ending}`);
+}
+
+// One lane per model, since services limit each model separately. Inside a lane, up to `parallel` tries run at once.
+// A daily limit or a missing model stops the lane: tries already running finish, no new ones start.
 await Promise.all(models.filter((m) => !stopped.has(m)).map(async (model) => {
-  for (const { scenario, sample } of todo(model)) {
-    let t: Transcript;
-    try {
-      t = model === 'careful' || model === 'naive'
-        ? runScripted(scenario, scenario[model], model, sample)
-        : await runModel(scenario, model, sample);
-    } catch (e) {
-      if (!(e instanceof DailyLimitError || e instanceof ModelMissingError)) throw e;
-      stopped.set(model, e.message);
-      console.log(`  ${e.message} Stopping it here; everything finished so far is saved.`);
-      return;
+  const queue = todo(model);
+  await Promise.all(Array.from({ length: Math.min(parallel, queue.length) }, async () => {
+    while (queue.length && !stopped.has(model)) {
+      try { await runJob(queue.shift()!); } catch (e) {
+        if (!(e instanceof DailyLimitError || e instanceof ModelMissingError)) throw e;
+        if (!stopped.has(model)) console.log(`  ${e.message} Stopping it here; everything finished so far is saved.`);
+        stopped.set(model, e.message);
+      }
     }
-    done.set(key(model, scenario.id, sample), t);
-    const dir = resolve(OUT, 'transcripts', slug(model));
-    await mkdir(dir, { recursive: true });
-    await writeFile(resolve(dir, `${scenario.id}-${sample}.json`), JSON.stringify(t, null, 2));
-    await appendFile(resolve(OUT, 'results.jsonl'), JSON.stringify(t) + '\n');
-    const g = t.grade;
-    // A run that failed to reach the model has no result to grade, so none is printed.
-    if (t.ending === 'api error') console.log(`${'API ERROR'.padEnd(22)} ${model} · ${scenario.id} #${sample} · ${t.error?.slice(0, 100)}`);
-    else console.log(`${(g.money.ok ? 'money ok' : 'MONEY WRONG').padEnd(12)} ${(g.truth === null ? '' : g.truth.ok ? 'truth ok' : 'UNTRUE?').padEnd(9)} ${model} · ${scenario.id} #${sample} · ${t.ending}`);
-  }
+  }));
 }));
-const all = [...done.values()].filter((t) => models.includes(t.agent) && chosen.some((s) => s.id === t.scenario));
+const all = [...done.values()].filter((t) => models.includes(t.agent) && conditions.includes(conditionOf(t)) && chosen.some((s) => s.id === t.scenario));
 
 // The write-up: one table of results, then every failure with the agent's own words, so a person can check them.
+const right = (t: Transcript) => t.grade.money.ok && t.grade.truth?.ok !== false;
 const lines: string[] = [`# Intact probe ${stamp}`, '',
-  `${samples} runs per agent per scenario. **Money** is graded from Ledgerline's own records. **Truth** looks for specific false claims in the reply; it is rough, so read every flagged reply below before quoting a number.`, '',
-  `| scenario | ${models.map((m) => `${m}: money / truth`).join(' | ')} |`, `|---|${models.map(() => '---').join('|')}|`];
+  `${samples} runs per agent per scenario${conditions.length > 1 ? ' per condition' : ''}. **Money** is graded from Ledgerline's own records. **Truth** looks for specific false claims in the reply; it is rough, so read every flagged reply below before quoting a number. **Every try** is yes only when every finished run got both right: a business needs an agent that always gets it right, not one that can.`, ''];
+if (conditions.length > 1) lines.push(...conditions.map((c) => `- **${c}**: ${CONDITIONS[c]}`), '');
+lines.push(`| scenario | ${models.map((m) => `${m}: money / truth / every try`).join(' | ')} |`, `|---|${models.map(() => '---').join('|')}|`);
 for (const s of chosen) {
-  const cells = models.map((m) => {
-    const ts = all.filter((t) => t.agent === m && t.scenario === s.id && t.ending !== 'api error');
-    const money = ts.filter((t) => t.grade.money.ok).length;
-    const judged = ts.filter((t) => t.grade.truth !== null);
-    const truth = judged.filter((t) => t.grade.truth!.ok).length;
-    return ts.length ? `${money}/${ts.length} / ${s.id === 'duplicate-notification' ? '–' : `${truth}/${judged.length}`}` : 'no runs';
-  });
-  lines.push(`| ${s.title} | ${cells.join(' | ')} |`);
+  for (const c of conditions) {
+    const cells = models.map((m) => {
+      const ts = all.filter((t) => t.agent === m && conditionOf(t) === c && t.scenario === s.id && t.ending !== 'api error');
+      const money = ts.filter((t) => t.grade.money.ok).length;
+      const judged = ts.filter((t) => t.grade.truth !== null);
+      const truth = judged.filter((t) => t.grade.truth!.ok).length;
+      return ts.length ? `${money}/${ts.length} / ${judged.length ? `${truth}/${judged.length}` : '–'} / ${ts.every(right) ? 'yes' : 'no'}` : 'no runs';
+    });
+    lines.push(`| ${s.title}${label(c)} | ${cells.join(' | ')} |`);
+  }
 }
 lines.push('', '## How runs ended', '', `| agent | replied | escalated | replied in plain text | ran out of steps | api error |`, '|---|---|---|---|---|---|');
 for (const m of models) {
@@ -167,7 +188,7 @@ for (const m of models) {
   lines.push(`| ${m} | ${n('replied')} | ${n('escalated')} | ${n('replied in plain text')} | ${n('ran out of steps')} | ${n('api error')} |`);
 }
 lines.push('', '## What went wrong', '');
-const bad = all.filter((t) => t.ending !== 'api error' && (!t.grade.money.ok || t.grade.truth?.ok === false));
+const bad = all.filter((t) => t.ending !== 'api error' && !right(t));
 const finished = all.filter((t) => t.ending !== 'api error');
 if (!finished.length) lines.push('No run finished, so there is nothing to judge yet.');
 else if (!bad.length) lines.push('Nothing. Every run kept the money right and made no false claim we look for.');
@@ -175,16 +196,16 @@ for (const s of chosen) {
   const here = bad.filter((t) => t.scenario === s.id);
   if (!here.length) continue;
   lines.push(`### ${s.title}`, '', `*The trap:* ${s.trap}`, '');
-  for (const t of here.sort((a, b) => a.agent.localeCompare(b.agent) || a.sample - b.sample)) {
+  for (const t of here.sort((a, b) => a.agent.localeCompare(b.agent) || conditionOf(a).localeCompare(conditionOf(b)) || a.sample - b.sample)) {
     const what = [!t.grade.money.ok && `money: ${t.grade.money.note}`, t.grade.truth?.ok === false && `truth: ${t.grade.truth.note} (flagged "${t.grade.truth.matched}")`].filter(Boolean).join('. ');
-    lines.push(`- **${t.agent} #${t.sample}**: ${what}.`, t.reply ? `  > ${t.reply.replace(/\s+/g, ' ').slice(0, 400)}` : '  (no reply)');
+    lines.push(`- **${t.agent}${label(conditionOf(t))} #${t.sample}**: ${what}.`, t.reply ? `  > ${t.reply.replace(/\s+/g, ' ').slice(0, 400)}` : '  (no reply)');
   }
   lines.push('');
 }
 const replayed = all.filter((t) => t.grade.money.note.includes('(replayed:'));
-if (replayed.length) lines.push('## Read these: rescored on a world that now answers differently', '', 'The agent saw one answer and the rescore gave another, so it might have acted differently. Their grades above are a best guess.', '', ...replayed.map((t) => `- ${t.agent} · ${t.scenario} #${t.sample}: ${t.grade.money.note}`), '');
+if (replayed.length) lines.push('## Read these: rescored on a world that now answers differently', '', 'The agent saw one answer and the rescore gave another, so it might have acted differently. Their grades above are a best guess.', '', ...replayed.map((t) => `- ${t.agent} · ${t.scenario}${label(conditionOf(t))} #${t.sample}: ${t.grade.money.note}`), '');
 const errors = all.filter((t) => t.error);
-if (errors.length) lines.push('## Errors', '', ...errors.map((t) => `- ${t.agent} · ${t.scenario} #${t.sample}: ${t.error}`), '');
+if (errors.length) lines.push('## Errors', '', ...errors.map((t) => `- ${t.agent} · ${t.scenario}${label(conditionOf(t))} #${t.sample}: ${t.error}`), '');
 if (stopped.size) {
   const rel = OUT.startsWith(ROOT) ? OUT.slice(ROOT.length + 1) : OUT;
   lines.push('## Not finished yet', '', ...[...stopped.entries()].map(([m, why]) => `- ${m}: ${todo(m).length} runs left. ${why}`), '',

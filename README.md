@@ -65,13 +65,18 @@ npm run probe -- --resume runs/probe-<time> --rescore
 
 It replays each run's tool calls on a fresh Ledgerline and grades the result. The old grades are kept in `results.before-rescore.jsonl`. If Ledgerline now answers a call differently from what the agent saw, the summary lists that run under "Read these", because the agent might have acted differently.
 
+## The first experiment
+
+`PLAN.md` holds the question, the four conditions, the models and how the results will be read, all written before the run. Conditions are chosen with `--conditions A,B,C,D` (see `probe/conditions.ts`), and `--parallel 4` runs several tries of a model at once, which matters for slow models.
+
 ## The code, in the order to read it
 
 1. `probe/scenarios.ts`: the five scenarios, what each trap is, and how each is graded.
 2. `probe/world.ts`: Ledgerline, the provider's notes the agent sees, and the tools.
 3. `probe/agent.ts`: the instructions and the loop that lets a model call tools until it replies.
 4. `probe/selfcheck.ts`: the check on the grading.
-5. `probe/run.ts`: runs everything and writes the summary.
+5. `probe/conditions.ts`: the experiment's four conditions.
+6. `probe/run.ts`: runs everything and writes the summary.
 
 ## Also here
 
