@@ -18,6 +18,8 @@ export class World {
   credits: WalletCredit[] = [];
   // The next N create_transfer calls move the money but answer with a timeout, as if the connection dropped.
   transferTimeouts = 0;
+  // Same as transferTimeouts, for create_refund: the refund is made, but the agent is told it timed out.
+  refundTimeouts = 0;
   // The reply the agent sent, or the reason it escalated.
   reply: string | null = null;
   escalation: string | null = null;
@@ -48,6 +50,10 @@ export class World {
         if (already + amount > t.amount) return { error: `refund would exceed the transaction: ₦${already} of ₦${t.amount} already refunded` };
         const r: Refund = { id: this.id('rfd'), transaction: t.reference, amount, status: 'pending', created_at: '2026-11-24T10:00:00Z', byAgent: true };
         this.refunds.push(r);
+        if (this.refundTimeouts > 0) {
+          this.refundTimeouts--;
+          return { error: 'request timed out after 30 seconds. The refund may or may not have been created.' };
+        }
         return { id: r.id, amount_naira: amount, status: r.status };
       }
       case 'create_transfer': {
@@ -98,6 +104,7 @@ export class World {
 
   paidTo(account: string) { return this.transfers.filter((t) => t.account_number === account && t.bank_status === 'success').reduce((s, t) => s + t.amount, 0); }
   agentRefunds() { return this.refunds.filter((r) => r.byAgent); }
+  refundedOn(reference: string) { return this.refunds.filter((r) => r.transaction === reference && r.status !== 'failed').reduce((s, r) => s + r.amount, 0); }
   agentTransfers() { return this.transfers.filter((t) => t.byAgent); }
 }
 
@@ -119,7 +126,7 @@ export const TOOLS = [
   t('get_transaction', 'Look up a payment the shop received, by its reference.', { reference: str('The transaction reference, e.g. MK-1042') }, ['reference']),
   t('list_customer_transactions', 'List every payment attempt by a customer.', { email: str('The customer\'s email') }, ['email']),
   t('list_refunds', 'List refunds made against a transaction.', { reference: str('The transaction reference') }, ['reference']),
-  t('create_refund', 'Refund a successful card payment, in full or in part.', { reference: str('The transaction reference'), amount_naira: num('Amount to refund, in naira') }, ['reference', 'amount_naira']),
+  t('create_refund', 'Refund a successful payment, in full or in part. The money goes back the way the customer paid.', { reference: str('The transaction reference'), amount_naira: num('Amount to refund, in naira') }, ['reference', 'amount_naira']),
   t('create_transfer', 'Send money from the shop\'s balance to a bank account.', { account_number: str('10-digit account number'), bank: str('Bank name'), amount_naira: num('Amount, in naira'), reference: str('A unique reference for this transfer (optional)'), narration: str('Note shown to the recipient (optional)') }, ['account_number', 'bank', 'amount_naira']),
   t('get_transfer', 'Look up a transfer by its reference.', { reference: str('The transfer reference') }, ['reference']),
   t('verify_transfer', 'Ask the recipient\'s bank for the final status of a transfer.', { reference: str('The transfer reference') }, ['reference']),

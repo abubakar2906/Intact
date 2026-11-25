@@ -1,6 +1,7 @@
 // Runs agents through the scenarios several times each and writes up what happened.
 // usage: npm run probe -- --models <id,id,...> [--scenarios a,b] [--samples 3]
 //        npm run probe -- --resume runs/probe-<time> [--models <corrected list>]   finish a run that stopped early
+//        npm run probe -- --resume runs/probe-<time> --rescore   grade finished runs again with the current grading. Calls no model.
 // "careful" and "naive" are the scripted agents: a free dry run that needs no API key.
 // Each model runs in its own lane, one request at a time, paced to its rate limits (see pace.ts).
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
@@ -9,13 +10,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { availableModels, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
+import { World } from './world.ts';
 import { DailyLimitError } from './pace.ts';
 import { SCENARIOS } from './scenarios.ts';
 import type { Transcript } from './types.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { values } = parseArgs({ options: {
-  models: { type: 'string' }, scenarios: { type: 'string' }, samples: { type: 'string' }, resume: { type: 'string' },
+  models: { type: 'string' }, scenarios: { type: 'string' }, samples: { type: 'string' }, resume: { type: 'string' }, rescore: { type: 'boolean' },
 } });
 
 // A run's settings are saved in run.json, so --resume carries on with exactly the same models, scenarios and samples.
@@ -61,6 +63,35 @@ if (existsSync(resolve(OUT, 'results.jsonl'))) {
     const t = JSON.parse(line) as Transcript;
     done.set(key(t.agent, t.scenario, t.sample), t);
   }
+}
+// Rescoring replays each run's tool calls on a fresh world and grades the result, so a fix to the grading or the world
+// can be checked against runs already paid for. If the world now answers a call differently from what the agent saw,
+// the note says so: the agent might have acted differently, so that run should be read, not just counted.
+if (values.rescore) {
+  if (!values.resume) { console.log('--rescore needs --resume <run folder>.'); process.exit(1); }
+  // Kept from the first rescore only, so a second rescore can't overwrite the original grades.
+  if (!existsSync(resolve(OUT, 'results.before-rescore.jsonl'))) await writeFile(resolve(OUT, 'results.before-rescore.jsonl'), [...done.values()].map((t) => JSON.stringify(t)).join('\n') + '\n');
+  let changed = 0;
+  for (const t of done.values()) {
+    if (t.ending === 'api error') continue;
+    const scenario = SCENARIOS.find((s) => s.id === t.scenario);
+    if (!scenario) continue;
+    const world = new World();
+    scenario.setup(world);
+    const differ: number[] = [];
+    t.steps.forEach((step, i) => {
+      if (step.kind !== 'tool') return;
+      if (JSON.stringify(world.call(step.name, step.args)) !== JSON.stringify(step.result)) differ.push(i + 1);
+    });
+    const before = JSON.stringify(t.grade);
+    t.grade = scenario.grade(world, t.reply, t.ending);
+    if (differ.length) t.grade.money.note += ` (replayed: the world now answers step ${differ.join(', ')} differently from what the agent saw, so read this run)`;
+    if (JSON.stringify(t.grade) !== before) changed++;
+    await mkdir(resolve(OUT, 'transcripts', slug(t.agent)), { recursive: true });
+    await writeFile(resolve(OUT, 'transcripts', slug(t.agent), `${t.scenario}-${t.sample}.json`), JSON.stringify(t, null, 2));
+  }
+  await writeFile(resolve(OUT, 'results.jsonl'), [...done.values()].map((t) => JSON.stringify(t)).join('\n') + '\n');
+  console.log(`Rescored ${done.size} runs: ${changed} grades changed. The old grades are in results.before-rescore.jsonl.`);
 }
 const todo = (m: string) => chosen.flatMap((scenario) => Array.from({ length: samples }, (_, i) => ({ model: m, scenario, sample: i + 1 })))
   .filter((j) => { const t = done.get(key(j.model, j.scenario.id, j.sample)); return !t || t.ending === 'api error'; });
@@ -141,6 +172,8 @@ for (const s of chosen) {
   }
   lines.push('');
 }
+const replayed = all.filter((t) => t.grade.money.note.includes('(replayed:'));
+if (replayed.length) lines.push('## Read these: rescored on a world that now answers differently', '', 'The agent saw one answer and the rescore gave another, so it might have acted differently. Their grades above are a best guess.', '', ...replayed.map((t) => `- ${t.agent} · ${t.scenario} #${t.sample}: ${t.grade.money.note}`), '');
 const errors = all.filter((t) => t.error);
 if (errors.length) lines.push('## Errors', '', ...errors.map((t) => `- ${t.agent} · ${t.scenario} #${t.sample}: ${t.error}`), '');
 if (stopped.size) {
