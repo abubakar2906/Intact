@@ -12,7 +12,7 @@ export class DailyLimitError extends Error {
   model: string;
   waitMs: number;
   constructor(model: string, waitMs: number) {
-    super(`${model} hit its daily limit. It resets in about ${formatWait(waitMs)}.`);
+    super(waitMs > 0 ? `${model} hit its daily limit. It resets in about ${formatWait(waitMs)}.` : `${model} hit its daily limit.`);
     this.model = model;
     this.waitMs = waitMs;
   }

@@ -103,7 +103,7 @@ const stopped = new Map<string, string>();
 
 // Catch a wrong model id before spending any runs on it.
 const real = models.filter((m) => m !== 'careful' && m !== 'naive');
-if (real.length) {
+if (real.length && jobCount > 0) {
   const offered = await availableModels();
   if (offered) {
     for (const m of real.filter((m) => !offered.includes(m))) {
