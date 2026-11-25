@@ -61,7 +61,7 @@ async function chat(model: string, messages: unknown[]) {
     if (res.status === 429) {
       const why = await res.text();
       // Some services (Gemini) send no reset time, only a message naming the daily quota. Waiting won't help: stop and resume tomorrow.
-      if (/per ?day|daily/i.test(why)) throw new DailyLimitError(model, 0);
+      if (/per[ -]?day|daily/i.test(why)) throw new DailyLimitError(model, 0);
       // With no reset time at all, ten refusals in a row means a cap we can't see. Stop rather than wait forever.
       if (refusals >= 10) throw new DailyLimitError(model, 0);
       const wait = refusalWait(model, res.headers, refusals++);
