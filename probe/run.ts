@@ -16,10 +16,18 @@ import { SCENARIOS, type Scenario } from './scenarios.ts';
 import type { Transcript } from './types.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: {
+const OPTIONS = {
   models: { type: 'string' }, scenarios: { type: 'string' }, samples: { type: 'string' }, resume: { type: 'string' }, rescore: { type: 'boolean' },
   conditions: { type: 'string' }, parallel: { type: 'string' },
-} });
+} as const;
+let values: ReturnType<typeof parseArgs<{ options: typeof OPTIONS }>>['values'];
+try {
+  ({ values } = parseArgs({ options: OPTIONS }));
+} catch (e) {
+  // Usually a command cut short when pasted, like "--parall". Say which part, not a stack trace.
+  console.log(`${(e as Error).message.split('.')[0]}. The options are: ${Object.keys(OPTIONS).map((o) => `--${o}`).join(', ')}. Check the end of the command wasn't cut off when you pasted it.`);
+  process.exit(1);
+}
 
 // A run's settings are saved in run.json, so --resume carries on with exactly the same models, scenarios and samples.
 type Plan = { models: string[]; scenarios: string[]; samples: number; conditions?: Condition[] };
