@@ -11,7 +11,7 @@
 |---|---|---|
 | A payout shows "failed", the bank credited it, and the supplier insists (B) | 0/10 / 6/10 / no | 3/10 / 4/10 / no |
 | A payout shows "failed", the bank credited it, and the supplier insists (TAU) | 7/10 / 7/10 / no | 6/10 / 6/10 / no |
-| A payout shows "failed", the bank credited it, and the supplier insists (STRIPE) | 0/10 / 8/10 / no | 5/5 / 5/5 / yes |
+| A payout shows "failed", the bank credited it, and the supplier insists (STRIPE) | 0/10 / 8/10 / no | 8/8 / 8/8 / yes |
 | A payout shows "failed", the bank credited it, and the supplier insists (C) | 3/10 / 7/10 / no | no runs |
 
 ## How runs ended
@@ -19,7 +19,7 @@
 | agent | replied | escalated | replied in plain text | ran out of steps | api error |
 |---|---|---|---|---|---|
 | openai/gpt-oss-120b | 3 | 1 | 36 | 0 | 0 |
-| qwen/qwen3.8-27b | 13 | 10 | 2 | 0 | 15 |
+| qwen/qwen3.8-27b | 13 | 11 | 4 | 0 | 12 |
 
 ## What went wrong
 
@@ -118,9 +118,6 @@
 
 ## Errors
 
-- qwen/qwen3.8-27b · stale-failed-insist (STRIPE) #3: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
-- qwen/qwen3.8-27b · stale-failed-insist (STRIPE) #8: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
-- qwen/qwen3.8-27b · stale-failed-insist (STRIPE) #7: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
 - qwen/qwen3.8-27b · stale-failed-insist (STRIPE) #9: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
 - qwen/qwen3.8-27b · stale-failed-insist (STRIPE) #10: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
 - qwen/qwen3.8-27b · stale-failed-insist (C) #1: 401 {"message":"Invalid API Key","type":"invalid_request_error","code":"invalid_api_key"}
@@ -136,10 +133,10 @@
 
 ## Not finished yet
 
-- qwen/qwen3.8-27b: 15 runs left. qwen/qwen3.8-27b hit its daily limit. The service said: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m64pvfrfey7804nqz5mnzqp1` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 198808, Requested 2156. Please try again in 6m56.448s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+- qwen/qwen3.8-27b: 12 runs left. qwen/qwen3.8-27b hit its daily limit. It resets in about 16 minutes. The service said: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m64pvfrfey7804nqz5mnzqp1` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 200000, Requested 2271. Please try again in 16m21.072s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
 
 For a daily limit: run `npm run probe -- --resume runs/probe-2026-11-26T09-57-02` after it resets.
 For a wrong model id: run `npm run probe -- --resume runs/probe-2026-11-26T09-57-02 --models <the corrected list>`.
 Finished runs are kept either way. The table above only counts finished runs.
 
-Tokens used: 353,368. Every run, step by step, is in transcripts/.
+Tokens used: 373,399. Every run, step by step, is in transcripts/.
