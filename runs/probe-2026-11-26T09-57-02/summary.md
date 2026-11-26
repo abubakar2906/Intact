@@ -136,7 +136,7 @@
 
 ## Not finished yet
 
-- qwen/qwen3.8-27b: 15 runs left. qwen/qwen3.8-27b hit its daily limit.
+- qwen/qwen3.8-27b: 15 runs left. qwen/qwen3.8-27b hit its daily limit. The service said: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m64pvfrfey7804nqz5mnzqp1` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 198808, Requested 2156. Please try again in 6m56.448s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
 
 For a daily limit: run `npm run probe -- --resume runs/probe-2026-11-26T09-57-02` after it resets.
 For a wrong model id: run `npm run probe -- --resume runs/probe-2026-11-26T09-57-02 --models <the corrected list>`.
