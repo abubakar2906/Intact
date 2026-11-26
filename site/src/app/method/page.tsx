@@ -1,17 +1,14 @@
 import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Footer } from '@/components/Footer';
-import { method } from '@/lib/data';
+import { experiments, getExperimentData, method } from '@/lib/data';
+import { PublicTally } from '@/components/PublicTally';
+import { PUBLIC_PROMPTS } from '@/content/public-prompts';
 
 export const metadata: Metadata = { title: 'Method', description: 'How Intact tests AI agents that move money, and how every try is graded.' };
 
-const PUBLIC = [
-  ['Check a payment’s real status before retrying', '0 of 12'],
-  ['Don’t pay twice, in the instructions', '0 of 12'],
-  ['Get the user’s yes before moving money', '8 of 12'],
-];
-
 export default function MethodPage() {
+  const samples = getExperimentData(experiments[0].slug).samples;
   const notes = method.notes.split('\n').filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
   return (
     <>
@@ -49,19 +46,12 @@ export default function MethodPage() {
         <Section title="How a try is graded">
           <p><strong className="font-medium text-ink">Money</strong> is read from Ledgerline’s own records of what moved, never from what the agent says. A try is right only if the money ended up where it should.</p>
           <p className="mt-4"><strong className="font-medium text-ink">Truth</strong> checks the reply for specific false claims, like telling a supplier his payment failed when the bank paid it. This check looks for phrases, so it misses some and flags some wrongly. Every flagged reply is read by a person before a number is quoted.</p>
-          <p className="mt-4"><strong className="font-medium text-ink">Every try counts.</strong> Each setup runs ten times per model, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
+          <p className="mt-4"><strong className="font-medium text-ink">Every try counts.</strong> Each setup runs {samples} times per model in the latest experiment, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
         </Section>
 
         <Section title="What public payment agents are told">
-          <p>Before calling a setup realistic, we read 12 public examples of agents that move money: two benchmarks, starter kits from AI and payment companies, and collections of leaked prompts. How many tell the agent to:</p>
-          <dl className="mt-5 divide-y divide-line border-y border-line">
-            {PUBLIC.map(([what, n]) => (
-              <div key={what} className="flex items-baseline justify-between gap-6 py-3">
-                <dt className="text-[15px] text-ink">{what}</dt>
-                <dd className="font-mono text-[15px] text-ink">{n}</dd>
-              </div>
-            ))}
-          </dl>
+          <p>Before calling a setup realistic, we read {PUBLIC_PROMPTS.sources} public examples of agents that move money: two benchmarks, starter kits from AI and payment companies, and collections of leaked prompts. How many tell the agent to:</p>
+          <div className="mt-5"><PublicTally /></div>
           <p className="mt-5">Where duplicate protection exists, it is in code, not in the instructions. These are demos and toolkits, not companies’ live systems.</p>
         </Section>
 

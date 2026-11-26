@@ -12,6 +12,8 @@ export type ExperimentData = {
   tries: Record<string, Record<string, Try[]>>;
   totals: Record<string, { wrong: number; n: number; errors: number }>;
   runCount: number;
+  samples: number; // the most tries any model had in one setup
+  folders: string[];
 };
 
 export type Step =

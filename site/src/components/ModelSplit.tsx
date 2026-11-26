@@ -7,10 +7,11 @@ import { ModelName } from './ModelName';
 export function ModelSplit({ exp, data, without = 'B', withNote = 'A' }: { exp: Experiment; data: ExperimentData; without?: string; withNote?: string }) {
   const name = (id: string) => exp.setups.find((s) => s.id === id)?.name ?? id;
   const rows = [...exp.models].sort((a, b) => data.counts[a][withNote].wrong - data.counts[b][withNote].wrong);
-  const Cell = ({ n }: { n: number }) => (
+  const most = Math.max(...exp.models.flatMap((m) => [data.counts[m][without].n, data.counts[m][withNote].n]));
+  const Cell = ({ n, of }: { n: number; of: number }) => (
     <span className="flex items-center gap-2.5">
       <span className="flex gap-[3px]" aria-hidden>
-        {Array.from({ length: 10 }, (_, i) => (
+        {Array.from({ length: of }, (_, i) => (
           <span key={i} className={`size-2.5 rounded-[2px] sm:size-3 ${i < n ? 'bg-red' : 'bg-track'}`} />
         ))}
       </span>
@@ -19,17 +20,17 @@ export function ModelSplit({ exp, data, without = 'B', withNote = 'A' }: { exp: 
   );
   const head = 'font-mono text-[12px] uppercase tracking-[0.08em] text-faint';
   return (
-    <div role="table" aria-label={`${exp.wrong}, out of 10 tries, ${name(without)} against ${name(withNote)}`}>
+    <div role="table" aria-label={`${exp.wrong}, out of ${most} tries, ${name(without)} against ${name(withNote)}`}>
       <div role="row" className="grid grid-cols-2 gap-4 pb-3 sm:grid-cols-[190px_1fr_1fr]">
-        <span role="columnheader" className={`hidden sm:block ${head}`}>{exp.wrong}, out of 10</span>
+        <span role="columnheader" className={`hidden sm:block ${head}`}>{exp.wrong}, out of {most}</span>
         <span role="columnheader" className={head}>{name(without)}</span>
         <span role="columnheader" className={head}>{name(withNote)}</span>
       </div>
       {rows.map((m) => (
         <div key={m} role="row" className="grid grid-cols-2 items-center gap-x-4 gap-y-2 border-t border-line py-3 sm:grid-cols-[190px_1fr_1fr]">
           <span role="rowheader" className="col-span-2 sm:col-span-1"><ModelName id={m} size={18} className="text-[15px] font-medium" /></span>
-          <span role="cell"><Cell n={data.counts[m][without].wrong} /></span>
-          <span role="cell"><Cell n={data.counts[m][withNote].wrong} /></span>
+          <span role="cell"><Cell n={data.counts[m][without].wrong} of={data.counts[m][without].n} /></span>
+          <span role="cell"><Cell n={data.counts[m][withNote].wrong} of={data.counts[m][withNote].n} /></span>
         </div>
       ))}
     </div>

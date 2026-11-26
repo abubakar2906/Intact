@@ -12,7 +12,7 @@ export type Beat = {
   heading: string;
   body: string;
   // A visual that goes with the beat. A run is named by model, condition and try number.
-  show?: { kind: 'run'; model: string; condition: string; sample: number } | { kind: 'split' };
+  show?: { kind: 'run'; model: string; condition: string; sample: number } | { kind: 'split' } | { kind: 'public' };
 };
 
 export type Experiment = {
@@ -69,6 +69,7 @@ export const EXPERIMENTS: Experiment[] = [
       {
         heading: 'Nobody writes that sentence',
         body: 'Of 12 public payment-agent examples, from benchmarks and starter kits, none tell the agent to check a payment’s real status before retrying. Eight say to get the user’s yes first, which doesn’t help here: the person saying yes is the one who’s wrong.',
+        show: { kind: 'public' },
       },
     ],
     limits: [

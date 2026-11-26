@@ -20,6 +20,9 @@ const SITE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RESULTS = resolve(SITE, '..', 'results');
 const OUT = resolve(SITE, 'src/data/generated');
 const PUBLIC_RUNS = resolve(SITE, 'public/runs');
+const PUBLIC_DATA = resolve(SITE, 'public/data');
+const csvFiles: Record<string, string> = {};
+const cell = (v: unknown) => { const t = String(v ?? ''); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
 
 const slug = (s: string) => s.toLowerCase().replace(/^[^/]+\//, '').replace(/[^a-z0-9]+/g, '-');
 export const runId = (experiment: string, model: string, condition: string, sample: number) =>
@@ -76,7 +79,15 @@ for (const e of EXPERIMENTS) {
     const all = e.models.map((m) => counts[m][s.id]);
     return [s.id, { wrong: all.reduce((n, c) => n + c.wrong, 0), n: all.reduce((n, c) => n + c.n, 0), errors: all.reduce((n, c) => n + c.errors, 0) }];
   }));
-  experiments[e.slug] = { counts, tries, totals, runCount: transcripts.length };
+  const samples = Math.max(0, ...e.models.flatMap((m) => e.setups.map((s) => tries[m][s.id].length)));
+  experiments[e.slug] = { counts, tries, totals, runCount: transcripts.length, samples, folders: e.results };
+  // One row per try, for anyone who wants the numbers in a spreadsheet. The full transcripts are in results/ on GitHub.
+  const header = ['model', 'setup', 'setup_name', 'try', 'verdict', 'money_ok', 'said_something_false', 'ending', 'run_id'];
+  const rows = e.models.flatMap((m) => e.setups.flatMap((s) => tries[m][s.id].map((t) => {
+    const r = runs[t.id] as { ending: string; money: { ok: boolean } };
+    return [m, s.id, s.name, t.sample, t.verdict, r.money.ok, t.untrue, r.ending, t.id];
+  })));
+  csvFiles[e.slug] = [header, ...rows].map((r) => r.map(cell).join(',')).join('\n') + '\n';
 }
 
 const usedConditions = [...new Set(EXPERIMENTS.flatMap((e) => e.setups.map((s) => s.id)))] as Condition[];
@@ -91,6 +102,9 @@ const method = {
 await mkdir(OUT, { recursive: true });
 await rm(PUBLIC_RUNS, { recursive: true, force: true });
 await mkdir(PUBLIC_RUNS, { recursive: true });
+await rm(PUBLIC_DATA, { recursive: true, force: true });
+await mkdir(PUBLIC_DATA, { recursive: true });
+for (const [slug, csv] of Object.entries(csvFiles)) await writeFile(resolve(PUBLIC_DATA, `intact-${slug}.csv`), csv);
 await writeFile(resolve(OUT, 'experiments.json'), JSON.stringify(experiments));
 await writeFile(resolve(OUT, 'runs.json'), JSON.stringify(runs));
 await writeFile(resolve(OUT, 'method.json'), JSON.stringify(method));

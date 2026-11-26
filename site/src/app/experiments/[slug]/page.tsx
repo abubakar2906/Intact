@@ -13,6 +13,8 @@ import { ChartFrame } from '@/components/ChartFrame';
 import { ResultsTable } from '@/components/ResultsTable';
 import { Flow } from '@/components/Flow';
 import { CopyButton } from '@/components/CopyButton';
+import { PublicTally } from '@/components/PublicTally';
+import { PUBLIC_PROMPTS } from '@/content/public-prompts';
 import { experiments, findRunId, formatDate, getExperiment, getExperimentData, getRun, method, rankModels } from '@/lib/data';
 
 export function generateStaticParams() {
@@ -108,6 +110,15 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
                       <ModelSplit exp={exp} data={data} />
                     </ChartFrame>
                   )}
+                  {b.show?.kind === 'public' && (
+                    <ChartFrame
+                      title="What public payment agents are told"
+                      definition={`${PUBLIC_PROMPTS.sources} examples from benchmarks and starter kits, one square each, filled where the instructions say it.`}
+                    >
+                      <PublicTally />
+                      <Link href={`${REPO}/blob/main/docs/public-prompts.md`} className="mt-4 inline-block text-[14px] text-muted underline underline-offset-4 hover:text-ink">Every source, with the lines quoted</Link>
+                    </ChartFrame>
+                  )}
                   {run && <RunCard run={run} wrongLabel={exp.wrong} />}
                 </div>
               </section>
@@ -141,6 +152,18 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
             >
               <TryGrid models={rankModels(exp, data)} setups={exp.setups.map((s) => ({ id: s.id, name: s.name }))} tries={data.tries} wrongLabel={exp.wrong} />
             </ChartFrame>
+            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-6">
+              <p className="text-[15px] font-medium">Get the data</p>
+              <a href={`/data/intact-${exp.slug}.csv`} download className="rounded-lg border border-line px-3 py-1.5 font-mono text-[13px] text-ink transition-colors hover:bg-wash">
+                Download CSV, one row per try
+              </a>
+              {data.folders.map((f) => (
+                // Folders end in the service the run used, e.g. "-groq", which is a shorter name than the folder.
+                <a key={f} href={`${REPO}/tree/main/results/${f}`} title={`results/${f}`} className="font-mono text-[13px] text-muted underline underline-offset-4 hover:text-ink">
+                  Full transcripts, {f.split('-').pop()} run
+                </a>
+              ))}
+            </div>
           </section>
 
           <section className="mt-28 grid gap-12 border-t border-line pt-12 lg:grid-cols-2">
