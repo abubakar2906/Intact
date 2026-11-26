@@ -20,7 +20,7 @@ export default function MethodPage() {
       <article className="mx-auto max-w-4xl px-6 sm:px-10">
         <header className="pt-10 sm:pt-16">
           <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-faint">Method</p>
-          <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-[48px]">How Intact tests an agent</h1>
+          <h1 className="mt-5 text-[40px] leading-[1.02] tracking-[-0.04em] sm:text-[64px]">How Intact tests an agent</h1>
           <p className="mt-6 text-[18px] leading-relaxed text-muted">
             An agent gets one message, the tools a real operations assistant would have, and a payment system that sometimes tells it something that isn’t true yet. We record every call it makes and grade where the money ended up.
           </p>
@@ -47,9 +47,9 @@ export default function MethodPage() {
         </Section>
 
         <Section title="How a try is graded">
-          <p><strong className="font-semibold text-ink">Money</strong> is read from Ledgerline’s own records of what moved, never from what the agent says. A try is right only if the money ended up where it should.</p>
-          <p className="mt-4"><strong className="font-semibold text-ink">Truth</strong> checks the reply for specific false claims, like telling a supplier his payment failed when the bank paid it. This check looks for phrases, so it misses some and flags some wrongly. Every flagged reply is read by a person before a number is quoted.</p>
-          <p className="mt-4"><strong className="font-semibold text-ink">Every try counts.</strong> Each setup runs ten times per model, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
+          <p><strong className="font-medium text-ink">Money</strong> is read from Ledgerline’s own records of what moved, never from what the agent says. A try is right only if the money ended up where it should.</p>
+          <p className="mt-4"><strong className="font-medium text-ink">Truth</strong> checks the reply for specific false claims, like telling a supplier his payment failed when the bank paid it. This check looks for phrases, so it misses some and flags some wrongly. Every flagged reply is read by a person before a number is quoted.</p>
+          <p className="mt-4"><strong className="font-medium text-ink">Every try counts.</strong> Each setup runs ten times per model, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
         </Section>
 
         <Section title="What public payment agents are told">
@@ -82,7 +82,7 @@ export default function MethodPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-16 border-t border-line pt-10">
-      <h2 className="text-[24px] font-semibold tracking-tight">{title}</h2>
+      <h2 className="text-[28px] leading-tight sm:text-[32px]">{title}</h2>
       <div className="mt-4 text-[17px] leading-relaxed text-muted">{children}</div>
     </section>
   );

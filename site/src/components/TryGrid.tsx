@@ -16,7 +16,7 @@ type Props = {
 
 const SQUARE: Record<Verdict, string> = {
   wrong: 'bg-red',
-  right: 'bg-right',
+  right: 'bg-correct',
   escalated: 'bg-paper ring-[1.5px] ring-inset ring-muted',
   error: 'bg-paper ring-1 ring-inset ring-line',
 };
@@ -99,13 +99,13 @@ export function TryGrid({ models, setups, tries, wrongLabel }: Props) {
           </tbody>
         </table>
       </div>
-      <p className="mt-4 font-mono text-[13px] text-faint">A white dot means the reply also said something false. Click any square to read that try.</p>
+      <p className="mt-4 font-mono text-[13px] text-faint">A dot inside a square means the reply also said something false. Click any square to read that try.</p>
 
       <dialog
         ref={dialog}
         onClose={() => { setOpen(null); opener.current?.focus(); }}
         onClick={(e) => { if (e.target === dialog.current) close(); }}
-        className="ml-auto mr-0 h-dvh max-h-dvh w-full max-w-[760px] bg-paper p-0 backdrop:bg-ink/40 open:animate-[slide_220ms_ease-out]"
+        className="ml-auto mr-0 h-dvh max-h-dvh w-full max-w-[760px] bg-paper p-0 backdrop:bg-scrim open:animate-[slide_220ms_ease-out]"
       >
         <div className="flex min-h-full flex-col">
           <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-paper px-6 py-5 sm:px-8">

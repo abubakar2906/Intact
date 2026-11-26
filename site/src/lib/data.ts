@@ -62,3 +62,11 @@ export const findRunId = (exp: ExperimentData, model: string, condition: string,
 
 export const formatDate = (iso: string) =>
   new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+// Models best first: fewest wrong in the experiment's first setup (no hint), then fewest wrong overall.
+// Every chart and table uses this order, so a model sits in the same place everywhere.
+export const rankModels = (exp: Experiment, data: ExperimentData): string[] => {
+  const first = exp.setups[0].id;
+  const all = (m: string) => exp.setups.reduce((n, s) => n + data.counts[m][s.id].wrong, 0);
+  return [...exp.models].sort((a, b) => data.counts[a][first].wrong - data.counts[b][first].wrong || all(a) - all(b));
+};

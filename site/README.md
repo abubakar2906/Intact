@@ -27,4 +27,6 @@ Vercel: import the repo and set the project's root directory to `site`. The buil
 
 ## The look
 
-A bank statement: white paper, black figures, and red only for money that went wrong. The agents' own words are set in Martian Mono, so they read as the machine talking. Tokens are in `src/app/globals.css`.
+A bank statement: white paper, black figures, and red only for money that went wrong. The agents' own words are set in Martian Mono, so they read as the machine talking. Headlines are Inter Tight at regular weight; everything else is Geist.
+
+Light is the default. The toggle in the header switches to dark and remembers it in localStorage; a small script in `layout.tsx` applies it before the first paint. Every colour is a token in `src/app/globals.css` with a light and a dark value, so components never write white or black. The hero cards stay dark in both themes, with a slow WebGL background (`src/components/Fluid.tsx`) that falls back to a CSS gradient.

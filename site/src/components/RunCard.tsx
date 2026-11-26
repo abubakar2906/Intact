@@ -45,7 +45,7 @@ export function RunCard({ run, wrongLabel = 'Paid twice', compact = false }: { r
               <span className={`col-start-2 font-mono text-[14px] sm:col-start-3 break-words sm:text-right ${isBad ? 'text-red' : out.error ? 'text-muted italic' : 'text-muted'}`}>
                 {out.text}
                 {isBad && (
-                  <span className="ml-2.5 inline-block rounded bg-red px-2 py-1 align-[1px] font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-white">
+                  <span className="ml-2.5 inline-block rounded bg-red px-2 py-1 align-[1px] font-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-paper">
                     {wrongLabel}
                   </span>
                 )}

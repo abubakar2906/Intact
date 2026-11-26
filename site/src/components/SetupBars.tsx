@@ -1,9 +1,10 @@
 import type { Experiment } from '@/content/experiments';
-import type { ExperimentData } from '@/lib/data';
+import { rankModels, type ExperimentData } from '@/lib/data';
 import { ModelName } from './ModelName';
 
 // One panel per setup: its total, then a bar per model. Red is the only colour, and it means a failed try.
 export function SetupBars({ exp, data, compact = false }: { exp: Experiment; data: ExperimentData; compact?: boolean }) {
+  const models = rankModels(exp, data);
   return (
     <div className={`grid gap-x-16 gap-y-12 ${compact ? 'md:grid-cols-2' : 'lg:grid-cols-2'}`}>
       {exp.setups.map((s) => {
@@ -12,7 +13,7 @@ export function SetupBars({ exp, data, compact = false }: { exp: Experiment; dat
           <section key={s.id} className="flex flex-col gap-3" aria-label={`${s.name}: ${total.wrong} of ${total.n} tries ${exp.wrong.toLowerCase()}`}>
             <header className="mb-2 flex items-start justify-between gap-6 border-b border-line pb-4">
               <div className="min-w-0">
-                <h3 className="text-[19px] font-semibold leading-snug">{s.name}</h3>
+                <h3 className="text-[20px] leading-snug">{s.name}</h3>
                 <p className="mt-1 max-w-sm text-[14px] leading-relaxed text-muted">{s.what}</p>
               </div>
               <div className="shrink-0 text-right">
@@ -20,7 +21,7 @@ export function SetupBars({ exp, data, compact = false }: { exp: Experiment; dat
                 <p className="mt-1.5 font-mono text-[13px] text-faint">of {total.n}</p>
               </div>
             </header>
-            {exp.models.map((m) => {
+            {models.map((m) => {
               const c = data.counts[m][s.id];
               return (
                 <div key={m} className="grid h-8 grid-cols-[minmax(0,170px)_1fr_48px] items-center gap-3 sm:grid-cols-[180px_1fr_52px] sm:gap-4">
