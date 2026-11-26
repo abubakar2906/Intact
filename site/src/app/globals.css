@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* Intact's look: a bank statement. White paper, black figures, and one colour with one meaning.
+   Red only ever marks money that went wrong (paid twice, refunded twice). Never use it for emphasis. */
+@theme {
+  --color-paper: #ffffff;
+  --color-wash: #f6f6f7;
+  --color-track: #eeeff1;
+  --color-line: #e6e7ea;
+  --color-faint: #8a9097;
+  --color-muted: #5d636b;
+  --color-ink: #111316;
+  --color-night: #0e1113;
+  --color-red: #c4342a;
+  --color-redwash: #fbeceb;
+  --color-redsoft: #ff8a80; /* red on the dark hero, where the base red is too dark to read */
+  --color-right: #c3c7cd;
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* The agents' own words and tool calls: wide and mechanical, so they read as the machine talking. */
+  --font-code: var(--font-martian), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* The try panel slides in from the right. Leaving is left to the browser, so it is instant. */
+@keyframes slide {
+  from { transform: translateX(32px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
