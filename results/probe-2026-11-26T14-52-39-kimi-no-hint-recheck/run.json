@@ -1,0 +1,12 @@
+{
+  "models": [
+    "moonshotai/kimi-k3.1-pro"
+  ],
+  "scenarios": [
+    "stale-failed"
+  ],
+  "samples": 10,
+  "conditions": [
+    "B"
+  ]
+}

@@ -75,7 +75,7 @@ export const EXPERIMENTS: Experiment[] = [
     limits: [
       'Five open models on free tiers. Frontier models are not in this run.',
       'Ledgerline is a made-up provider. It behaves like real ones in this one way, but it is not any one of them.',
-      'Ten tries per model per setup. These are counts, not rates.',
+      'Ten tries per model per setup. These are counts, not rates, and they swing: Kimi paid twice 2 of 10 times with no hint here, then 4 of 10 when the same setup was run again the next day.',
       'One GLM try under the lock was lost to a network error, so that setup has 49 tries.',
     ],
   },
