@@ -40,7 +40,10 @@ export function makeWorld(scenario: Scenario, condition: Condition = 'A'): World
 }
 
 const BASE_URL = (process.env.INTACT_BASE_URL ?? 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+// INTACT_API_KEY=proxy means the key is never in this process: the network adds it to each request on its way out,
+// as a cloud environment's secret does. Sending our own header then would only get in its way.
 const KEY = process.env.INTACT_API_KEY ?? process.env.OPENROUTER_API_KEY;
+const AUTH: Record<string, string> = KEY && KEY !== 'proxy' ? { authorization: `Bearer ${KEY}` } : {};
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE_URL);
 
 // What's missing before any model can be asked, or null if nothing is. Checked once before a run starts.
@@ -79,7 +82,7 @@ export class ModelMissingError extends Error {
 // The model ids this service offers, or null if it doesn't say. Used to catch a wrong id before any run starts.
 export async function availableModels(): Promise<string[] | null> {
   try {
-    const res = await fetch(`${BASE_URL}/models`, { headers: KEY ? { authorization: `Bearer ${KEY}` } : {} });
+    const res = await fetch(`${BASE_URL}/models`, { headers: AUTH });
     if (!res.ok) return null;
     const body = await res.json() as any;
     return Array.isArray(body.data) ? body.data.map((m: any) => String(m.id)) : null;
@@ -99,7 +102,7 @@ async function chat(model: string, messages: unknown[]) {
     try {
       res = await fetch(`${BASE_URL}/chat/completions`, {
         method: 'POST',
-        headers: { ...(KEY ? { authorization: `Bearer ${KEY}` } : {}), 'content-type': 'application/json', 'x-title': 'Intact' },
+        headers: { ...AUTH, 'content-type': 'application/json', 'x-title': 'Intact' },
         // OpenRouter adds each reply's exact cost when asked. Other services may refuse an unknown field, so only there.
         body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto', ...(OPENROUTER ? { usage: { include: true } } : {}) }),
       });

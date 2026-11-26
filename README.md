@@ -46,6 +46,8 @@ $env:INTACT_API_KEY = "your-nvidia-key"
 npm run probe -- --models moonshotai/kimi-k3.1-pro,z-ai/glm-5.3-flash,minimaxai/minimax-m3.1-flash --scenarios stale-failed --conditions A,B,C,D --samples 10 --parallel 4
 ```
 
+If a proxy adds the key for you, as a cloud environment's secret does, set `INTACT_API_KEY` to `proxy`: the probe then sends no key of its own.
+
 Your summary lands in `runs/`. Compare it with the published one in `results/`. Free models change and sample differently each try, so expect your counts to be close, not identical. If yours differ a lot, please open an issue with your summary: that's exactly what a benchmark needs.
 
 ## The plan
