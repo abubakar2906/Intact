@@ -85,7 +85,8 @@ export async function availableModels(): Promise<string[] | null> {
     const res = await fetch(`${BASE_URL}/models`, { headers: AUTH });
     if (!res.ok) return null;
     const body = await res.json() as any;
-    return Array.isArray(body.data) ? body.data.map((m: any) => String(m.id)) : null;
+    // Gemini lists its ids as "models/gemini-…" but expects them without the prefix when asked.
+    return Array.isArray(body.data) ? body.data.map((m: any) => String(m.id).replace(/^models\//, '')) : null;
   } catch { return null; }
 }
 
