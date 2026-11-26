@@ -51,6 +51,22 @@ export function missingSetup(): string | null {
     : 'No service is set up. Set INTACT_BASE_URL and INTACT_API_KEY in this terminal window (they only last for the window they were set in), or OPENROUTER_API_KEY for OpenRouter. Then run again.';
 }
 
+// A spending cap for paid services. Once the run has spent `budget` dollars, no new request starts.
+// OpenRouter reports each reply's exact cost. For other services, pass prices per million tokens and it is estimated.
+// Requests already in flight still finish, so the total can go a little over: set the cap below what you can spend.
+export class BudgetError extends Error {
+  constructor(spentSoFar: number, budget: number) {
+    super(`The budget of $${budget.toFixed(2)} is reached (spent about $${spentSoFar.toFixed(2)}).`);
+  }
+}
+const money = { spent: 0, budget: 0, priceIn: 0, priceOut: 0, reported: false };
+export function setBudget(budget: number, price?: [number, number]) {
+  money.budget = budget;
+  if (price) [money.priceIn, money.priceOut] = price;
+}
+export const spent = () => ({ dollars: money.spent, exact: money.reported });
+const OPENROUTER = BASE_URL.includes('openrouter.ai');
+
 // The model id isn't on this service, or this key can't use it. Stops that model instead of failing every run.
 export class ModelMissingError extends Error {
   model: string;
@@ -77,13 +93,15 @@ async function chat(model: string, messages: unknown[]) {
   if (!KEY && !LOCAL) throw new Error('Set OPENROUTER_API_KEY, or INTACT_BASE_URL and INTACT_API_KEY for another service.');
   let serverErrors = 0, refusals = 0, garbled = 0, last = '';
   while (true) {
+    if (money.budget && money.spent >= money.budget) throw new BudgetError(money.spent, money.budget);
     await waitForRoom(model, log);
     let res: Response;
     try {
       res = await fetch(`${BASE_URL}/chat/completions`, {
         method: 'POST',
         headers: { ...(KEY ? { authorization: `Bearer ${KEY}` } : {}), 'content-type': 'application/json', 'x-title': 'Intact' },
-        body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto' }),
+        // OpenRouter adds each reply's exact cost when asked. Other services may refuse an unknown field, so only there.
+        body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto', ...(OPENROUTER ? { usage: { include: true } } : {}) }),
       });
     } catch (e) {
       // The request never reached the service: a dropped connection or flaky network. Treat it like a server error.
@@ -112,6 +130,8 @@ async function chat(model: string, messages: unknown[]) {
     }
     const body = await res.json().catch(() => ({})) as any;
     noteReply(model, res.headers, body.usage?.total_tokens ?? null);
+    if (typeof body.usage?.cost === 'number') { money.spent += body.usage.cost; money.reported = true; }
+    else if (money.priceIn || money.priceOut) money.spent += ((body.usage?.prompt_tokens ?? 0) * money.priceIn + (body.usage?.completion_tokens ?? 0) * money.priceOut) / 1e6;
     const err = body.error ?? (res.ok ? null : body);
     const text = JSON.stringify(err ?? '');
     if (res.status === 404 || /model_not_found|does not exist|not have access/i.test(text)) throw new ModelMissingError(model, `${res.status}`);
@@ -202,7 +222,7 @@ export async function runModel(scenario: Scenario, model: string, sample: number
     return finish(scenario, world, model, sample, steps, 'ran out of steps', said(), { inputTokens, outputTokens, condition });
   } catch (e) {
     // A daily limit isn't this run's fault: hand it up so the run stops this model and the job is done on resume.
-    if (e instanceof DailyLimitError || e instanceof ModelMissingError) throw e;
+    if (e instanceof DailyLimitError || e instanceof ModelMissingError || e instanceof BudgetError) throw e;
     return finish(scenario, world, model, sample, steps, 'api error', null, { error: String((e as Error).message ?? e), inputTokens, outputTokens, condition });
   }
 }

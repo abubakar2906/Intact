@@ -2,6 +2,7 @@
 // usage: npm run probe -- --models <id,id,...> [--scenarios a,b] [--samples 3] [--conditions A,B,C,D] [--parallel 3]
 //        npm run probe -- --resume runs/probe-<time> [--models <corrected list>]   finish a run that stopped early
 //        npm run probe -- --resume runs/probe-<time> --rescore   grade finished runs again with the current grading. Calls no model.
+//        add --budget 3 to stop starting new tries once about $3 is spent (exact on OpenRouter; elsewhere add --price in,out per million tokens)
 // "careful" and "naive" are the scripted agents: a free dry run that needs no API key.
 // Each model runs in its own lane, with up to --parallel tries at a time, paced to its rate limits (see pace.ts).
 import { mkdir, writeFile, appendFile, readFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { availableModels, makeWorld, missingSetup, ModelMissingError, runModel, runScripted, setLog } from './agent.ts';
+import { availableModels, BudgetError, makeWorld, missingSetup, ModelMissingError, runModel, runScripted, setBudget, setLog, spent } from './agent.ts';
 import { CONDITIONS, parseConditions, type Condition } from './conditions.ts';
 import { DailyLimitError } from './pace.ts';
 import { SCENARIOS, type Scenario } from './scenarios.ts';
@@ -18,7 +19,7 @@ import type { Transcript } from './types.ts';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OPTIONS = {
   models: { type: 'string' }, scenarios: { type: 'string' }, samples: { type: 'string' }, resume: { type: 'string' }, rescore: { type: 'boolean' },
-  conditions: { type: 'string' }, parallel: { type: 'string' },
+  conditions: { type: 'string' }, parallel: { type: 'string' }, budget: { type: 'string' }, price: { type: 'string' },
 } as const;
 let values: ReturnType<typeof parseArgs<{ options: typeof OPTIONS }>>['values'];
 try {
@@ -71,6 +72,12 @@ const samples = plan.samples;
 // asking too fast is still waited out, so a service that allows less only slows down, it doesn't fail.
 const parallel = Math.max(1, Number(values.parallel ?? 3));
 const slug = (m: string) => m.replace(/[^a-z0-9.-]+/gi, '_');
+// The budget is per command, not saved with the run: a resumed run gets a fresh cap, so pass it again.
+const budget = Number(values.budget ?? 0);
+const price = values.price ? (values.price.split(',').map(Number) as [number, number]) : undefined;
+if (values.budget && !(budget > 0)) { console.log('--budget takes dollars, e.g. --budget 3'); process.exit(1); }
+if (price && (price.length !== 2 || price.some((n) => !(n >= 0)))) { console.log('--price takes two numbers, dollars per million input and output tokens, e.g. --price 1.25,10'); process.exit(1); }
+if (budget) setBudget(budget, price);
 const conditionOf = (t: Transcript) => (t.condition ?? 'A') as Condition;
 const key = (agent: string, condition: string, scenario: string, sample: number) => `${agent}|${condition}|${scenario}|${sample}`;
 // Runs from before conditions existed keep their old file name.
@@ -163,7 +170,7 @@ await Promise.all(models.filter((m) => !stopped.has(m)).map(async (model) => {
   await Promise.all(Array.from({ length: Math.min(parallel, queue.length) }, async () => {
     while (queue.length && !stopped.has(model)) {
       try { await runJob(queue.shift()!); } catch (e) {
-        if (!(e instanceof DailyLimitError || e instanceof ModelMissingError)) throw e;
+        if (!(e instanceof DailyLimitError || e instanceof ModelMissingError || e instanceof BudgetError)) throw e;
         if (!stopped.has(model)) console.log(`  ${e.message} Stopping it here; everything finished so far is saved.`);
         stopped.set(model, e.message);
       }
@@ -222,6 +229,8 @@ if (stopped.size) {
     'Finished runs are kept either way. The table above only counts finished runs.', '');
 }
 const tokens = all.reduce((s, t) => s + t.inputTokens + t.outputTokens, 0);
-lines.push(`Tokens used: ${tokens.toLocaleString('en')}. Every run, step by step, is in transcripts/.`);
+const cost = spent();
+const costLine = cost.dollars ? ` This command spent ${cost.exact ? '' : 'about '}$${cost.dollars.toFixed(2)}${cost.exact ? ', as reported by the service' : ', estimated from --price'}.` : '';
+lines.push(`Tokens used: ${tokens.toLocaleString('en')}.${costLine} Every run, step by step, is in transcripts/.`);
 await writeFile(resolve(OUT, 'summary.md'), lines.join('\n') + '\n');
 console.log(`\n${lines.join('\n')}\nSaved to ${OUT}`);

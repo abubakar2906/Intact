@@ -97,6 +97,8 @@ On a Mac or Linux, use `export INTACT_BASE_URL=...` instead. OpenRouter is the d
 npm run probe -- --resume runs/probe-<time>
 ```
 
+**Paying for a model?** Add a spending cap: `--budget 3` stops starting new tries once about $3 is spent and keeps everything finished. On OpenRouter the cost of every reply is exact. On other services add `--price 1.25,10` (dollars per million input and output tokens, from the service's price page) and it is estimated. Tries already running when the cap is reached still finish, so set it a little below what you can spend.
+
 **Grading changed after a run?** Grade the finished runs again without calling any model:
 
 ```sh
