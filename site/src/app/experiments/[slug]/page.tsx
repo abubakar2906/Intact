@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { HeroCard } from '@/components/HeroCard';
+import { SiteHeader } from '@/components/SiteHeader';
 import { Footer } from '@/components/Footer';
 import { SetupBars } from '@/components/SetupBars';
 import { ModelSplit } from '@/components/ModelSplit';
@@ -43,19 +43,17 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
 
   return (
     <>
-      <HeroCard still>
-        <header className="relative mx-auto w-full max-w-6xl px-6 pb-12 pt-10 sm:px-10 sm:pb-16 sm:pt-20">
-          <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-white/60 sm:text-[13px]">
+      <main className="flex-1 pb-24">
+        <SiteHeader />
+        <header className="mx-auto w-full max-w-6xl px-6 pt-10 sm:px-10 sm:pt-16">
+          <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-faint">
             Experiment {n} · {exp.eyebrow} · {formatDate(exp.date)}
           </p>
           <h1 className="mt-5 max-w-5xl text-[36px] leading-[1.04] tracking-[-0.04em] sm:text-[60px]">
-            <Claim text={exp.claim} highlight={exp.claimHighlight} onDark />
+            <Claim text={exp.claim} highlight={exp.claimHighlight} />
           </h1>
-          <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-white/75 sm:text-[19px]">{exp.lede}</p>
+          <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-[19px]">{exp.lede}</p>
         </header>
-      </HeroCard>
-
-      <main className="flex-1 pb-24">
         <article className="mx-auto max-w-6xl px-6 sm:px-10">
           <section className="mt-14 sm:mt-20" aria-label="Why it matters">
             <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-faint">Why it matters</p>

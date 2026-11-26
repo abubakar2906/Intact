@@ -83,6 +83,16 @@ h1, h2, h3 {
   outline-offset: 2px;
 }
 
+/* Chart motion, started by <Reveal>. Each bar carries its final size in --to and its starting size in --from.
+   Only with JavaScript (data-js, set in layout.tsx) do charts wait at --from, so without it they simply show the result. */
+.reveal-h { height: var(--to); transition: height 900ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0ms), background-color 200ms linear calc(var(--delay, 0ms) + 700ms); }
+.reveal-w { width: var(--to); transition: width 900ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0ms); }
+.reveal-fill { transition: background-color 160ms linear var(--delay, 0ms); }
+[data-js] [data-reveal]:not([data-shown]) .reveal-h { height: var(--from); background-color: var(--from-color, currentColor); transition: none; }
+[data-js] [data-reveal]:not([data-shown]) .reveal-w { width: var(--from, 0%); transition: none; }
+[data-js] [data-reveal]:not([data-shown]) .reveal-fill { background-color: var(--color-track); transition: none; }
+[data-js] [data-reveal]:not([data-shown]) [data-count], [data-js] [data-count][data-waiting] { visibility: hidden; }
+
 /* The try panel slides in from the right. Leaving is left to the browser, so it is instant. */
 @keyframes slide {
   from { transform: translateX(32px); opacity: 0; }

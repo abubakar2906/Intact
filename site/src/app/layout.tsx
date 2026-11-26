@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 // Runs while the page is parsed, before the first paint, so a saved dark theme never flashes light.
 // The key matches THEME_KEY in components/ThemeToggle.tsx.
-const THEME_SCRIPT = `(function(){try{if(localStorage.getItem("intact-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()`;
+const THEME_SCRIPT = `(function(){document.documentElement.setAttribute("data-js","");try{if(localStorage.getItem("intact-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()`;
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (

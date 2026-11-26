@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { HeroCard } from '@/components/HeroCard';
 import { Footer } from '@/components/Footer';
@@ -80,13 +79,6 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-14 border-t border-line pt-8">
-            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-faint">As posted</p>
-            <div className="mt-4 grid max-w-2xl grid-cols-2 gap-4 sm:gap-6">
-              <Snippet src="/img/stale-payout.png" width={1200} height={1295} alt="Chart: with no hint, AI agents paid the supplier twice in 29 of 50 tries; with one sentence, 1 of 50; with a lock in the tool, 0." caption="Every model, every setup" />
-              <Snippet src="/img/paid-then-checked.png" width={1200} height={1134} alt="One run step by step: told to check with the bank before resending, gpt-oss-120b resent first, checked second, then called the duplicate a favour." caption="The one slip under the one-sentence rule" />
-            </div>
-          </div>
         </section>
 
         {/* Roadmap */}
@@ -122,16 +114,5 @@ export default function Home() {
       </main>
       <Footer />
     </>
-  );
-}
-
-function Snippet({ src, width, height, alt, caption }: { src: string; width: number; height: number; alt: string; caption: string }) {
-  return (
-    <figure className="min-w-0">
-      <a href={src} className="block overflow-hidden rounded-xl border border-line transition-opacity hover:opacity-90">
-        <Image src={src} width={width} height={height} alt={alt} sizes="(min-width: 640px) 320px, 45vw" className="w-full" />
-      </a>
-      <figcaption className="mt-2.5 text-[13px] leading-snug text-muted">{caption}</figcaption>
-    </figure>
   );
 }
