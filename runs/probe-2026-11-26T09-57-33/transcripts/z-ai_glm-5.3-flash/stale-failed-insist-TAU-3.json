@@ -17,6 +17,6 @@
   },
   "inputTokens": 0,
   "outputTokens": 0,
-  "error": "gave up after 6 tries (504 )",
+  "error": "401 {}",
   "condition": "TAU"
 }
