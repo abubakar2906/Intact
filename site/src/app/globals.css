@@ -11,6 +11,7 @@
   --color-muted: #5d636b;
   --color-ink: #111316;
   --color-night: #0e1113;
+  --color-space: #05060c; /* the home page sky */
   --color-red: #c4342a;
   --color-redwash: #fbeceb;
   --color-redsoft: #ff8a80; /* red on the dark hero, where the base red is too dark to read */
@@ -53,4 +54,18 @@ h1, h2, h3 {
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* The home page sky (Galaxy.tsx). Slow on purpose: it should feel still until you look at it. */
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(6%, 4%, 0) scale(1.08); }
+}
+@keyframes slide-band {
+  from { transform: translate3d(-4%, 0, 0); }
+  to { transform: translate3d(4%, 0, 0); }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.95; }
 }

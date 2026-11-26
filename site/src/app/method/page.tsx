@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/SiteHeader';
+import { Footer } from '@/components/Footer';
 import { method } from '@/lib/data';
 
 export const metadata: Metadata = { title: 'Method', description: 'How Intact tests AI agents that move money, and how every try is graded.' };
@@ -13,7 +14,8 @@ const PUBLIC = [
 export default function MethodPage() {
   const notes = method.notes.split('\n').filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
   return (
-    <main>
+    <>
+    <main className="flex-1 pb-24">
       <SiteHeader />
       <article className="mx-auto max-w-4xl px-6 sm:px-10">
         <header className="pt-10 sm:pt-16">
@@ -72,6 +74,8 @@ export default function MethodPage() {
         </Section>
       </article>
     </main>
+    <Footer />
+    </>
   );
 }
 

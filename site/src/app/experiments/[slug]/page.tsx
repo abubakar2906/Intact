@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
+import { Footer } from '@/components/Footer';
 import { SetupBars } from '@/components/SetupBars';
 import { ModelSplit } from '@/components/ModelSplit';
 import { RunCard } from '@/components/RunCard';
@@ -28,7 +29,8 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
   const n = String(exp.number).padStart(2, '0');
 
   return (
-    <main>
+    <>
+    <main className="flex-1 pb-24">
       <SiteHeader />
       <article className="mx-auto max-w-6xl px-6 sm:px-10">
         <header className="pt-10 sm:pt-16">
@@ -106,5 +108,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
         </section>
       </article>
     </main>
+    <Footer />
+    </>
   );
 }

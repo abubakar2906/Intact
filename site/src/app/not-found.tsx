@@ -1,15 +1,19 @@
 import Link from 'next/link';
 import { SiteHeader } from '@/components/SiteHeader';
+import { Footer } from '@/components/Footer';
 
 export default function NotFound() {
   return (
-    <main>
+    <>
+    <main className="flex-1 pb-24">
       <SiteHeader />
       <div className="mx-auto max-w-6xl px-6 pt-20 sm:px-10">
         <h1 className="text-[32px] font-semibold tracking-tight">There’s nothing at this address</h1>
         <p className="mt-3 text-[17px] text-muted">The experiment or run may have moved.</p>
-        <Link href="/#experiments" className="mt-8 inline-block text-[16px] font-medium underline underline-offset-4">See every experiment</Link>
+        <Link href="/experiments" className="mt-8 inline-block text-[16px] font-medium underline underline-offset-4">See every experiment</Link>
       </div>
     </main>
+    <Footer />
+    </>
   );
 }

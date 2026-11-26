@@ -10,7 +10,7 @@ export function SiteHeader({ over = false }: { over?: boolean }) {
         Intact
       </Link>
       <nav className="flex items-center gap-6 text-[15px]">
-        <Link href="/#experiments" className={link}>Experiments</Link>
+        <Link href="/experiments" className={link}>Results</Link>
         <Link href="/method" className={link}>Method</Link>
       </nav>
     </header>
