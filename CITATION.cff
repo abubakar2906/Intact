@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use Intact, its scenarios or its results, please cite it."
+title: "Intact: a benchmark for AI agents that move money"
+type: software
+authors:
+  - family-names: Yinusa
+    given-names: Abubakar
+    alias: kairo_v0
+repository-code: "https://github.com/abubakar2906/Intact"
+license: MIT
+date-released: 2026-11-26
+keywords:
+  - AI agents
+  - benchmark
+  - payments
+  - tool use
+  - evaluation

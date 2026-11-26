@@ -1,7 +1,13 @@
 {
   "name": "intact",
   "private": true,
-  "description": "AI agents are starting to handle money. Intact checks they keep it intact.",
+  "description": "A benchmark for AI agents that move money: when a payment system gets things wrong, does the money stay right?",
+  "license": "MIT",
+  "author": "Abubakar Yinusa (https://x.com/kairo_v0)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abubakar2906/Intact"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.6"
