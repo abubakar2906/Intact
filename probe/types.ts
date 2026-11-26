@@ -5,7 +5,9 @@ export type ToolCall = { name: string; args: Record<string, unknown> };
 // One thing that happened during a run, in order: the agent called a tool and got a result, or it wrote text.
 export type Step =
   | { kind: 'tool'; name: string; args: Record<string, unknown>; result: unknown }
-  | { kind: 'text'; text: string };
+  | { kind: 'text'; text: string }
+  // The person who wrote in answered the agent's reply (see Scenario.followUp).
+  | { kind: 'message'; from: string; text: string };
 
 // How a run ended. "replied" and "escalated" are the two ways the agent is told to finish.
 export type Ending = 'replied' | 'escalated' | 'replied in plain text' | 'ran out of steps' | 'api error';

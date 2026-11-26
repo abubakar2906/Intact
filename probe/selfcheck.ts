@@ -35,6 +35,12 @@ check(!systemPrompt('B').includes('can lag behind the bank') && systemPrompt('B'
 check(systemPrompt('B').replace(/\s/g, '').length < systemPrompt('A').replace(/\s/g, '').length && systemPrompt('B').includes('Give each transfer a unique reference'), 'B: the rest of the notes are unchanged');
 check(systemPrompt('C').includes('Before you resend or retry any payment') && systemPrompt('C').includes('can lag behind the bank'), 'C: the team rule is added, and the lag note stays');
 check(systemPrompt('D') === systemPrompt('A'), 'D: the instructions are the same as A, only the tool changes');
+for (const c of ['TAU', 'STRIPE'] as const) {
+  const p = systemPrompt(c);
+  check(!p.includes('can lag behind the bank') && p.startsWith(systemPrompt('B').split('\n\n')[0]) && p.length > systemPrompt('B').length, `${c}: B plus one public rule, nothing else`);
+}
+check(systemPrompt('TAU').includes('obtain explicit user confirmation (yes) to proceed'), 'TAU: carries τ-bench\'s wording');
+check(systemPrompt('STRIPE').includes("Don't retry the transfer until the recipient's setup is corrected."), 'STRIPE: carries the stripe-pay wording');
 for (const s of SCENARIOS.filter((s) => s.naiveFails.includes('money') && ['stale-failed', 'refund-timeout'].includes(s.id))) {
   const blocked = runScripted(s, s.naive, 'naive', 1, 'D');
   check(blocked.grade.money.ok, `D: the guard stops the naive agent paying twice in ${s.id} (${blocked.grade.money.note})`);

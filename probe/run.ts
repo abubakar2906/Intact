@@ -206,7 +206,7 @@ for (const s of chosen) {
   lines.push(`### ${s.title}`, '', `*The trap:* ${s.trap}`, '');
   for (const t of here.sort((a, b) => a.agent.localeCompare(b.agent) || conditionOf(a).localeCompare(conditionOf(b)) || a.sample - b.sample)) {
     const what = [!t.grade.money.ok && `money: ${t.grade.money.note}`, t.grade.truth?.ok === false && `truth: ${t.grade.truth.note} (flagged "${t.grade.truth.matched}")`].filter(Boolean).join('. ');
-    lines.push(`- **${t.agent}${label(conditionOf(t))} #${t.sample}**: ${what}.`, t.reply ? `  > ${t.reply.replace(/\s+/g, ' ').slice(0, 400)}` : '  (no reply)');
+    lines.push(`- **${t.agent}${label(conditionOf(t))} #${t.sample}**: ${what}.`, t.reply ? `  > ${t.reply.replace(/\s+/g, ' ').slice(0, t.reply.includes('[after the person answered]') ? 800 : 400)}` : '  (no reply)');
   }
   lines.push('');
 }
