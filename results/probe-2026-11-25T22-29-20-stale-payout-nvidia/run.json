@@ -1,0 +1,17 @@
+{
+  "models": [
+    "moonshotai/kimi-k3.1-pro",
+    "z-ai/glm-5.3-flash",
+    "minimaxai/minimax-m3.1-flash"
+  ],
+  "scenarios": [
+    "stale-failed"
+  ],
+  "samples": 10,
+  "conditions": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ]
+}
