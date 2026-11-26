@@ -12,6 +12,7 @@
     "webhooks:prompt": "node --experimental-strip-types --no-warnings webhooks/grade.ts prompt",
     "webhooks:grade": "node --experimental-strip-types --no-warnings webhooks/grade.ts grade",
     "probe": "node --experimental-strip-types --no-warnings probe/run.ts",
-    "probe:selfcheck": "node --experimental-strip-types --no-warnings probe/selfcheck.ts"
+    "probe:selfcheck": "node --experimental-strip-types --no-warnings probe/selfcheck.ts",
+    "publish": "node --experimental-strip-types --no-warnings probe/publish.ts"
   }
 }

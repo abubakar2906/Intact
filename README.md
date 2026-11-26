@@ -69,6 +69,14 @@ It replays each run's tool calls on a fresh Ledgerline and grades the result. Th
 
 `PLAN.md` holds the question, the four conditions, the models and how the results will be read, all written before the run. Conditions are chosen with `--conditions A,B,C,D` (see `probe/conditions.ts`), and `--parallel 4` runs several tries of a model at once, which matters for slow models.
 
+## Results
+
+Finished runs are published in `results/`, each with the plan it ran with (`run.json`), every run with its full transcript (`results.jsonl`) and the summary. To publish one:
+
+```sh
+npm run publish -- runs/probe-<time> <short-name>
+```
+
 ## The code, in the order to read it
 
 1. `probe/scenarios.ts`: the five scenarios, what each trap is, and how each is graded.
