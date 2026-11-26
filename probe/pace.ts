@@ -11,8 +11,10 @@ export const LONGEST_WAIT_MS = 5 * 60_000;
 export class DailyLimitError extends Error {
   model: string;
   waitMs: number;
-  constructor(model: string, waitMs: number) {
-    super(waitMs > 0 ? `${model} hit its daily limit. It resets in about ${formatWait(waitMs)}.` : `${model} hit its daily limit.`);
+  // `why` is the service's own refusal, kept so a person can check it really was a daily limit.
+  constructor(model: string, waitMs: number, why = '') {
+    const said = why ? ` The service said: ${why.replace(/\s+/g, ' ').slice(0, 400)}` : '';
+    super((waitMs > 0 ? `${model} hit its daily limit. It resets in about ${formatWait(waitMs)}.` : `${model} hit its daily limit.`) + said);
     this.model = model;
     this.waitMs = waitMs;
   }
