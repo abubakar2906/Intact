@@ -4,7 +4,7 @@ import type { Ending, Step, ToolCall, Transcript } from './types.ts';
 import type { Scenario } from './scenarios.ts';
 import { World, TOOLS, LEDGERLINE_NOTES } from './world.ts';
 import type { Condition } from './conditions.ts';
-import { DailyLimitError, LONGEST_WAIT_MS, noteReply, refusalWait, sleep, waitForRoom } from './pace.ts';
+import { DailyLimitError, LONGEST_WAIT_MS, noteReply, parseWait, refusalWait, sleep, waitForRoom } from './pace.ts';
 
 const MAX_STEPS = 12;
 
@@ -117,13 +117,16 @@ async function chat(model: string, messages: unknown[]) {
     }
     if (res.status === 429) {
       const why = await res.text();
-      // Some services (Gemini) send no reset time, only a message naming the daily quota. Waiting won't help: stop and resume tomorrow.
-      if (/per[ -]?day|daily/i.test(why)) throw new DailyLimitError(model, 0, why);
-      // With no reset time at all, ten refusals in a row means a cap we can't see. Stop rather than wait forever.
-      if (refusals >= 10) throw new DailyLimitError(model, 0, why);
-      const wait = refusalWait(model, res.headers, refusals++);
-      if (wait > LONGEST_WAIT_MS) throw new DailyLimitError(model, wait);
-      continue;
+      // A wait the service names, in a header or in its message ("try again in 1m31s").
+      const named = parseWait(res.headers.get('retry-after')) ?? parseWait(why.match(/try again in ([\d.hms]+)/i)?.[1] ?? null);
+      // Some services (Gemini) send no wait at all, only a message naming the daily quota. Waiting won't help: stop and resume tomorrow.
+      // Groq's daily token limit is counted over the last 24 hours, so room frees up within minutes: it names a short wait, and we take it.
+      if (named === null && /per[ -]?day|daily/i.test(why)) throw new DailyLimitError(model, 0, why);
+      // With no wait named at all, ten refusals in a row means a cap we can't see. Stop rather than wait forever.
+      if (named === null && refusals >= 10) throw new DailyLimitError(model, 0, why);
+      const wait = refusalWait(model, res.headers, refusals++, named);
+      if (wait > LONGEST_WAIT_MS) throw new DailyLimitError(model, wait, why);
+      continue; // waitForRoom, at the top of the loop, sits out the wait
     }
     if (res.status >= 500) {
       noteReply(model, res.headers, null);

@@ -6,7 +6,8 @@
 // Before each request we wait if the last reply said there isn't room for another one.
 
 // A wait longer than this means a daily cap. Waiting hours inside a run is pointless: stop the model and resume later.
-export const LONGEST_WAIT_MS = 5 * 60_000;
+// 15 minutes, because Groq's rolling daily token limit can ask for a 7 minute wait that does then clear.
+export const LONGEST_WAIT_MS = 15 * 60_000;
 
 export class DailyLimitError extends Error {
   model: string;
@@ -75,8 +76,8 @@ export function noteReply(model: string, headers: Headers, tokensUsed: number | 
 }
 
 // After a refusal (429): how long to wait before trying again.
-export function refusalWait(model: string, headers: Headers, attempt: number): number {
-  const said = parseWait(headers.get('retry-after')) ?? parseWait(headers.get('x-ratelimit-reset-tokens')) ?? parseWait(headers.get('x-ratelimit-reset'));
+export function refusalWait(model: string, headers: Headers, attempt: number, named: number | null = null): number {
+  const said = named ?? parseWait(headers.get('retry-after')) ?? parseWait(headers.get('x-ratelimit-reset-tokens')) ?? parseWait(headers.get('x-ratelimit-reset'));
   const wait = (said ?? Math.min(60_000, 2000 * 2 ** attempt)) + 500;
   state(model).readyAt = Date.now() + wait;
   return wait;
