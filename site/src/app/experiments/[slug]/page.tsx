@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { HomeNav } from '@/components/HomeNav';
 import { Footer } from '@/components/Footer';
-import { SetupBars } from '@/components/SetupBars';
+import { Ladder } from '@/components/a/Ladder';
+import { TwoRecords } from '@/components/a/TwoRecords';
+import { exhibitFacts } from '@/lib/exhibit';
 import { ModelSplit } from '@/components/ModelSplit';
 import { RunCard } from '@/components/RunCard';
 import { TryGrid } from '@/components/TryGrid';
-import { Claim } from '@/components/Claim';
 import { ModelName } from '@/components/ModelName';
 import { ChartFrame } from '@/components/ChartFrame';
 import { ResultsTable } from '@/components/ResultsTable';
@@ -36,6 +37,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
   if (!exp) notFound();
   const data = getExperimentData(slug);
   const scenario = method.scenarios[exp.scenario];
+  const facts = exhibitFacts(exp, data);
   const n = String(exp.number).padStart(2, '0');
   const wrong = exp.wrong.toLowerCase();
   const year = exp.date.slice(0, 4);
@@ -48,31 +50,31 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
         <div className="home-wrap">
           <HomeNav cta={{ href: REPO, label: 'Run it on GitHub' }} />
           <div className="exp-intro">
-            <p className="home-kicker">Experiment {n}, {exp.eyebrow.toLowerCase()}, {formatDate(exp.date)}</p>
-            <h1><Claim text={exp.claim} highlight={exp.claimHighlight} /></h1>
+            <h1>{exp.claim}</h1>
             <p className="home-lede exp-lede">{exp.lede}</p>
             <div className="home-ctas">
               <a href="#every-try" className="home-btn home-btn-main">Open every try</a>
               <a href="#data" className="home-btn home-btn-quiet">Get the data</a>
             </div>
+            <p className="exp-meta">Experiment {n}, published {formatDate(exp.date)}</p>
           </div>
+          {facts && <TwoRecords facts={facts} setupName={exp.setups.find((s) => s.id === facts.run.condition)?.name ?? facts.run.setupName} payer="Mama’s Kitchen" />}
         </div>
       </header>
 
       <main className="home-wrap">
         <section className="exp-why" aria-label="Why it matters">
-          <p className="home-kicker">Why it matters</p>
           <p className="exp-why-text">{exp.whyItMatters}</p>
         </section>
 
         <section className="exp-part">
           <ChartFrame
             level={2}
-            title={`${exp.wrong}, by setup`}
-            definition={`Times each model ${wrong}, out of its tries, in each of the ${exp.setups.length} setups.`}
+            title="What each setup told the agent"
+            definition={`Every try, one square each, grouped by model. Red means it ${wrong}.`}
             lowerIsBetter
           >
-            <div className="exp-setups"><SetupBars exp={exp} data={data} panel="exp-card exp-pad" /></div>
+            <Ladder exp={exp} data={data} />
           </ChartFrame>
         </section>
 
@@ -137,7 +139,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <p className="exp-body">
             The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.
           </p>
-          <div className="mt-10"><HowItWorks /></div>
+          <div className="mt-10"><HowItWorks first={exp.exhibit?.first} /></div>
         </section>
 
         <section id="every-try" className="exp-part scroll-mt-8">

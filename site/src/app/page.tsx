@@ -105,7 +105,7 @@ export default function Home() {
 
         <section className="home-wrap home-part" aria-labelledby="how-h">
           <h2 id="how-h">How the benchmark works</h2>
-          <HowItWorks />
+          <HowItWorks first={latest.exhibit?.first} />
         </section>
 
         <section className="home-wrap home-part" aria-labelledby="results">

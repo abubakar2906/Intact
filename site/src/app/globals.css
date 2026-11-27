@@ -393,3 +393,118 @@ h1, h2, h3 {
   .home-rules { grid-template-columns: minmax(0, 1fr); }
   .home-rules li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }
+
+/* ===== Direction A, "Two records" ===== */
+.exp .exp-why { display: block; padding-top: 8px; }
+.exp .exp-why-text { font-size: 30px; line-height: 1.3; max-width: 900px; }
+.exp .exp-intro { padding: 72px 0 0; max-width: 940px; }
+.exp-meta { margin-top: 28px; font: 13px var(--font-mono); color: var(--home-text-3); }
+.exp { --rec-wash: rgb(224 72 61 / 0.07); --sq-right: #dcdce0; }
+[data-theme='dark'] .exp { --rec-wash: rgb(240 100 90 / 0.1); --sq-right: #2c2c31; }
+
+/* The hero: what Ledgerline told the agent, beside what the bank did. */
+.rec { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; margin: 56px 0 0; padding-bottom: 88px; }
+.rec-said, .rec-bank { border-radius: 16px; background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom));
+  box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 24px 60px var(--home-frame-drop); }
+.rec-said { display: flex; flex-direction: column; padding: 24px; }
+.rec-src { font-size: 13px; color: var(--home-text-3); }
+.rec-ref { margin-top: 20px; font: 13px var(--font-mono); color: var(--home-text-2); }
+.rec-amt { margin-top: 4px; font-size: 36px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.rec-status { margin-top: 14px; }
+.rec-status span { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 11px; border-radius: 8px; font: 13px var(--font-mono); color: var(--home-text-2);
+  background: var(--home-frame); box-shadow: inset 0 0 0 1px var(--home-edge); }
+.rec-status span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--home-text-3); }
+.rec-foot { margin-top: auto; padding-top: 24px; font-size: 14px; color: var(--home-text-2); }
+.rec-bank { padding: 24px 28px 8px; }
+.rec-bank table { width: 100%; margin-top: 12px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.rec-bank th, .rec-bank td { text-align: left; padding: 14px 12px 14px 0; font-weight: 400; }
+.rec-bank thead th { font-size: 12px; color: var(--home-text-3); padding-top: 4px; padding-bottom: 10px; }
+.rec-bank tbody td { border-top: 1px solid var(--home-edge); font-size: 15px; }
+.rec-bank tbody td:nth-child(1), .rec-bank tbody td:nth-child(2) { font: 13px var(--font-mono); color: var(--home-text-2); white-space: nowrap; }
+.rec-bank tbody td:nth-child(3) { color: var(--home-text-2); }
+.rec-bank th:last-child, .rec-bank td:last-child { text-align: right; padding-right: 0; font-weight: 600; white-space: nowrap; }
+.rec-new td { background: var(--rec-wash); color: var(--try-wrong) !important; }
+.rec-new td:first-child { box-shadow: inset 2px 0 0 var(--try-wrong); padding-left: 10px; }
+.rec-bank tfoot th, .rec-bank tfoot td { border-top: 1px solid var(--home-edge); padding-top: 18px; padding-bottom: 18px; }
+.rec-bank tfoot th { font-size: 15px; font-weight: 500; }
+.rec-bank tfoot td { position: relative; font-size: 28px; letter-spacing: -0.02em; color: var(--try-wrong); }
+.rec-total-was { position: absolute; right: 0; top: 18px; color: var(--home-text); opacity: 0; }
+.rec figcaption { grid-column: 1 / -1; max-width: 760px; font-size: 15px; line-height: 1.55; color: var(--home-text-2); }
+/* The one moment: the agent's second payment lands on the statement, and the total turns from one payment to two. */
+@keyframes rec-land { from { opacity: 0; transform: translateY(-10px); } }
+/* A slight blur while the totals swap, so the old and new figures read as one number changing. */
+@keyframes rec-out { from { opacity: 1; filter: blur(0); } to { opacity: 0; filter: blur(3px); } }
+@keyframes rec-in { from { opacity: 0; filter: blur(3px); } }
+.rec-new td { animation: rec-land 560ms cubic-bezier(0.23, 1, 0.32, 1) 700ms both; }
+.rec-total-was { animation: rec-out 200ms ease-out 1060ms both; }
+.rec-total { animation: rec-in 260ms ease-out 1060ms both; }
+
+/* Results: each setup, and every try under it. */
+.ladder { margin-top: 8px; }
+.ladder-head, .ladder-row { display: grid; grid-template-columns: 280px minmax(0, 1fr) 112px; gap: 24px; align-items: center; }
+.ladder-head { padding-bottom: 12px; }
+.ladder-models, .ladder-tries { display: flex; gap: 18px; }
+.ladder-models > span { width: 127px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--home-text-3); white-space: nowrap; overflow: hidden; }
+.ladder-row { padding: 22px 0; border-top: 1px solid var(--home-edge); }
+.ladder-what h3 { font-size: 18px; letter-spacing: -0.01em; }
+.ladder-what p { margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--home-text-2); max-width: 260px; }
+.ladder-model { display: grid; grid-template-columns: repeat(10, 10px); gap: 3px; }
+.ladder-model i { width: 10px; height: 18px; border-radius: 2px; background: var(--sq-right); }
+.ladder-model i.sq-wrong { background: var(--try-wrong); }
+.ladder-model i.sq-escalated { background: transparent; box-shadow: inset 0 0 0 1.5px var(--home-text-3); }
+.ladder-model i.sq-error { background: transparent; box-shadow: inset 0 0 0 1px var(--home-edge); }
+.ladder-count { text-align: right; color: var(--home-text-3); font-size: 14px; }
+.ladder-count b { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--home-text); margin-right: 4px; font-variant-numeric: tabular-nums; }
+.ladder-count b.is-wrong { color: var(--try-wrong); }
+
+/* How it works: each step over the record it produces, along one payment's path. */
+.how-a { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 48px; }
+.how-a .art { position: relative; height: 148px; padding: 16px; border-radius: 14px; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-size: 14px;
+  background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom)); box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 1px 2px var(--home-drop); }
+.how-a li:not(:last-child) .art::after { content: ''; position: absolute; top: 50%; right: -24px; width: 24px; height: 1px; background: var(--home-text-3); opacity: 0.5; }
+.how-a h3 { display: flex; align-items: baseline; gap: 10px; margin-top: 20px; font-size: 18px; letter-spacing: -0.01em; }
+.how-a .how-n { font: 13px var(--font-mono); color: var(--home-text-3); }
+.how-a li > p { margin-top: 8px; color: var(--home-text-2); line-height: 1.55; }
+.art-trap p { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--home-edge); }
+.art-trap p:first-child { border-top: 0; }
+.art-trap span { color: var(--home-text-3); }
+.art-trap b { font-weight: 500; font-family: var(--font-mono); font-size: 13px; }
+.art-msg p { padding: 12px 14px; border-radius: 14px 14px 14px 4px; background: var(--home-frame); box-shadow: inset 0 0 0 1px var(--home-edge); line-height: 1.45; }
+.art-log p { font: 12.5px/1.5 var(--font-mono); color: var(--home-text); }
+.art-log span { color: var(--home-text-3); }
+.art-log p.is-wrong, .art-log p.is-wrong span { color: var(--try-wrong); }
+.art-grade { align-items: flex-start; }
+.art-grade p { color: var(--home-text-3); }
+.art-grade .art-grade-fig { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: var(--try-wrong); }
+.art-chip { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #fff; background: var(--try-wrong); }
+
+@media (max-width: 900px) {
+  .exp .exp-intro { padding-top: 32px; }
+  .rec { grid-template-columns: minmax(0, 1fr); margin-top: 40px; padding-bottom: 64px; }
+  .exp .exp-why-text { font-size: 22px; }
+  .rec-bank { padding: 20px 16px 4px; }
+  /* On a phone each statement line is date over reference, with the credit on the right. */
+  .rec-bank thead { display: none; }
+  .rec-bank table, .rec-bank tbody, .rec-bank tfoot { display: block; }
+  .rec-bank tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; border-top: 1px solid var(--home-edge); padding: 12px 0; }
+  .rec-bank tbody td, .rec-bank tfoot th, .rec-bank tfoot td { border-top: 0; padding: 0; }
+  .rec-bank tbody td:nth-child(1) { grid-row: 1; }
+  .rec-bank tbody td:nth-child(2) { grid-row: 2; }
+  .rec-bank tbody td:nth-child(3) { display: none; }
+  .rec-bank tbody td:nth-child(4) { grid-row: 1 / 3; grid-column: 2; align-self: center; }
+  .rec-new { margin: 0 -16px; padding: 12px 16px !important; background: var(--rec-wash); box-shadow: inset 2px 0 0 var(--try-wrong); }
+  .rec-new td, .rec-new td:first-child { background: none; box-shadow: none; padding-left: 0; }
+  .rec-bank tfoot tr { align-items: center; padding: 16px 0; }
+  .rec-bank tfoot th { padding-right: 8px; font-size: 14px; }
+  .rec-total-was { top: 0; }
+  .rec-bank tbody td { font-size: 14px; }
+  .rec-bank tfoot td { font-size: 22px; }
+  .ladder-head { display: none; }
+  .ladder-row { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; }
+  .ladder-tries { grid-column: 1 / -1; grid-row: 2; gap: 8px; }
+  .ladder-model { grid-template-columns: repeat(10, 5px); gap: 1px; }
+  .ladder-model i { width: 5px; height: 14px; border-radius: 1px; }
+  .ladder-count b { font-size: 26px; }
+  .how-a { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .how-a li:not(:last-child) .art::after { display: none; }
+}
