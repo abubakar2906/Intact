@@ -119,6 +119,50 @@ npm run probe -- --models moonshotai/kimi-k3.1-pro,z-ai/glm-5.3-flash,minimaxai/
 npm run probe -- --models openai/gpt-oss-120b,qwen/qwen3.8-27b --scenarios stale-failed-insist --conditions B,TAU,STRIPE,C --samples 10 --parallel 2
 ```
 
+## Third run: the models agents actually run on
+
+Written on 27 November, before this run, and before any credits arrived.
+
+**The questions:** do the models people actually use for agents pay twice? Does paying for the best model fix it? And what does getting it right cost?
+
+**Why:** the first two runs used five open models on free tiers. The obvious question is whether the models teams deploy behave the same. "Deploy" means what people use, not the most expensive model there is: nobody runs a payments agent on a flagship at flagship prices.
+
+**Models,** chosen by a rule written down first, from public usage data. The full working is in `docs/model-choice.md`:
+
+| Role | Model | Why it's here |
+|---|---|---|
+| Workhorse | DeepSeek V4.1 Flash | Most tool calls on OpenRouter, 2 to 26 November |
+| Workhorse | Tencent Hy4 Flash | Second lab by tool calls |
+| Workhorse | OpenAI GPT-6 Luna | OpenAI's most-used model for tool calls |
+| Workhorse | Claude Haiku 5.5 | Anthropic's most-used model for tool calls |
+| Ceiling | Claude Opus 5.5 | The best a team could pay for, and the one flagship with real agent use |
+
+GLM 5.3 Flash, the third lab by tool calls, was already tested in the first experiment.
+
+**Where the runs go:** through LaunchVerse's API, with compute credits from LaunchVerse. Both facts go in the results and on the site. A gateway sits between the probe and the model's maker, and the first runs showed hosting can matter, so every result says which service ran it.
+
+**What runs, in this order,** so the most important answers come first if credits run out:
+
+1. **One try per model,** to check tool calls work through the gateway and to measure what a try costs. Not counted.
+2. **Stale payout, no hint (B):** the five models, 10 tries each.
+3. **Stale payout, one sentence (C):** the four workhorses, 10 tries each.
+4. **The supplier pushes back (`stale-failed-insist`), B and C:** the four workhorses, 10 tries each.
+5. **Opus with the one sentence (C):** 10 tries, only if Opus paid twice at least once under B. If it never did, there is nothing for the sentence to fix.
+6. **If credits remain:** the public examples' rules (TAU, STRIPE) on the pushback, for the workhorses.
+
+**Cost per try** is recorded for every run: the tokens it used, priced at each model's list price on the day it ran. For a business, the useful question is what it costs to get it right, not which model is smartest.
+
+**How we'll read it**, decided now:
+
+- **Workhorses under B near the open models (29 of 50):** the trap is about the models people deploy, not just free ones.
+- **Workhorses under B near zero:** the open models were the problem. Say so plainly, even though it is the less interesting headline.
+- **Opus near zero under B, workhorses near zero under C:** compare the price of the two fixes, a bigger model or one sentence, per try.
+- **Opus pays twice under B:** even the best model a team can buy does this.
+- **The pushback:** read only from what happens after the supplier insists, never by comparing this run's totals with an earlier run's. The Kimi recheck showed totals out of 10 swing too much for that.
+- Per model, 10 tries are too few to rank. Across four workhorses (40 tries), a difference under 8 is noise.
+
+**Not in this run:** D, the lock. It refuses a repeat by design, so its result doesn't depend on the model.
+
 ## Changes since writing
 
 **26 November, after the Groq results came in.** The conditions, prompts, tools and grading did not change. Three decisions were made after seeing results, so they're written down here:
