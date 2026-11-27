@@ -1225,3 +1225,26 @@ h1, h2, h3 {
 .lab-shot .home-shot-dark { display: block !important; opacity: 0; transition: opacity 220ms ease; }
 [data-theme='dark'] .lab-shot .home-shot-dark { opacity: 1; }
 .lab-shot .home-shot-light { display: block !important; }
+/* The research list, on the home page and the results list. */
+.nx-list { margin-top: 40px; }
+.rl-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin: 0 80px; padding: 24px 0; border-top: 1px solid var(--hair); }
+.rl-meta { display: grid; gap: 2px; align-content: start; }
+.rl-meta dd:first-of-type { color: var(--ink); }
+.nx .rl-title { font-family: var(--font-geist), sans-serif; font-weight: 500; font-size: 22px; line-height: 1.3; letter-spacing: -0.015em; text-wrap: balance; }
+.rl-title a { transition: color 150ms ease-out; }
+.rl-title a:hover { color: var(--ink-2); }
+.rl-next { color: var(--ink-3); }
+.rl-lede { margin-top: 12px; font-family: var(--font-serif), Georgia, serif; font-size: 18px; line-height: 1.6; color: var(--ink-2); }
+.rl-link { margin-top: 12px; font-size: 14px; }
+.rl-link a { border-bottom: 1px solid var(--hair); transition: border-color 150ms ease-out; }
+.rl-link a:hover { border-color: var(--ink); }
+.rl-fig { margin: 24px 80px 64px; }
+/* The dashboard picture, in a hairline frame. */
+.nx-shot { position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 0 0 1px var(--hair); }
+.nx-shot img { display: block; width: 100%; height: auto; }
+@media (max-width: 900px) {
+  .rl-row { grid-template-columns: minmax(0, 1fr); row-gap: 12px; margin: 0 20px; }
+  .rl-fig { margin: 16px 20px 48px; }
+  .nx .rl-title { font-size: 19px; }
+}
+.nx-list-page { margin-top: 72px; padding-bottom: 96px; }

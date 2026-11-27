@@ -61,6 +61,12 @@ cd site && npm run lint && npx tsc --noEmit -p .
 
 Live at https://intact-bench.vercel.app. Rebuilt on 28 November 2026 in the "lab" style, on every page that matters:
 home (`src/app/page.tsx`), each experiment (`src/app/experiments/[slug]/page.tsx`), the research list and the method.
+- **Ground:** white by default; dark only when someone picks it (saved under `intact-theme`, applied before first paint by `layout.tsx`).
+- **Copy:** outcomes as paid once or twice, not amounts. No country in the copy; the transcripts keep their real details.
+- **Logo mark:** a rounded square with a slot cut in it (`.intact-mark`).
+- **Older pieces** (`TryGrid`, `ResultsTable`, the run pages) still use the site-wide tokens. The older `.note` and `.nx` styles in `globals.css` are no longer used by the main pages.
+
+**Design skills, in this order:** frontend-design for direction, dataviz for charts, emil-design-eng for interactions and motion, then unslop as the final pass. Respect `prefers-reduced-motion`.
 
 - **Two voices:** Google Sans Flex (roundness 30) for words, Geist Mono for data. Red means money paid twice, nothing else.
 - **A sidebar grid:** section numbers and facts on the left, the reading column beside them, figures across. Styles are the `.lab` block at the end of `globals.css`, with light and dark tokens.
@@ -71,10 +77,10 @@ home (`src/app/page.tsx`), each experiment (`src/app/experiments/[slug]/page.tsx
 
 ## Next jobs on the site
 
-As of 27 November, after the chapters redesign:
+As of 27 November:
 
-1. **Bring the results list (`/experiments`) into the same style.** The method and experiment pages are done.
-2. **Platform on the home page:** it is no longer there. Add it back in this style when the owner asks.
+1. **All pages share the lab style.** Home sections: opening, 01 Figure 1, 02 one sentence, 03 what we build from it (public wording, dashboard picture), 04 research (`ResearchList`).
+2. **Platform section:** public wording only, from `PLATFORM` in `content/how-it-works.ts`.
 3. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
 4. **Design skills** are in `.claude/skills/`: frontend-design (Anthropic, Apache 2.0), emil-design-eng and choreograph (Emil Kowalski, MIT), unslop (CC BY 4.0). Use them in that order, with dataviz for charts.
 5. **Dev server note:** Turbopack's Tailwind loader can keep serving old CSS. Restart `next dev` with `.next/dev` removed after CSS edits, and never run `next build` beside a running dev server.
