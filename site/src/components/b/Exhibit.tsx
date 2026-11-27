@@ -1,7 +1,7 @@
 import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
 import { describeCall, describeResult, MOVES_MONEY } from '@/lib/describe';
-import { hhmm, naira, shortDay, type ExhibitFacts } from '@/lib/exhibit';
+import { hhmm, shortDay, type ExhibitFacts } from '@/lib/exhibit';
 
 // The agent's own tool calls are the evidence, so one try is set large, in order, with a note
 // beside each step saying what the agent could not see. The left half of the hero (TwoRecords).
@@ -10,15 +10,14 @@ import { hhmm, naira, shortDay, type ExhibitFacts } from '@/lib/exhibit';
 export function Exhibit({ facts, setupName, wrongLabel, fullReply = false }: { facts: ExhibitFacts; setupName: string; wrongLabel: string; fullReply?: boolean }) {
   const { run, first } = facts;
   const tools = run.steps.filter((s) => s.kind === 'tool');
-  const total = first.amountNaira + (facts.resend?.amountNaira ?? 0);
   const sentAt = tools.findIndex((t) => t.name === 'create_transfer');
   const note = (name: string, args: Record<string, unknown>, i: number): string | null => {
     if (name === 'verify_transfer' && args.reference === first.reference && sentAt >= 0 && sentAt < i) return 'It checked with the bank after resending. Already credited.';
     if (name === 'get_transfer' && args.reference === first.reference) return `Out of date. The bank credited this on ${shortDay(first.credited)} at ${hhmm(first.credited)}.`;
-    if (name === 'create_transfer') return `The second ${naira(Number(args.amount_naira))}. ${first.payee} was already paid.`;
+    if (name === 'create_transfer') return `The second payment. ${first.payee} was already paid.`;
     if (name === 'verify_transfer' && args.reference !== first.reference) return facts.checkedFirstWithBank ? 'It asked the bank about the new payment.' : 'It asked the bank about the new payment. Never the first.';
     if (name === 'verify_transfer') return 'The bank’s answer: already credited.';
-    if (name === 'send_reply') return `${first.payee} now has ${naira(total)} for a ${naira(first.amountNaira)} invoice.`;
+    if (name === 'send_reply') return `${first.payee} has now been paid twice for one invoice.`;
     return null;
   };
   // The reply, cut to its first two sentences: enough to show what the agent claimed.

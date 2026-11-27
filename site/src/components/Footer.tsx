@@ -9,7 +9,7 @@ export function Footer({ wide = false }: { wide?: boolean }) {
           <div>
             <Link href="/" className="inline-flex items-center gap-2 font-display text-[18px] font-medium tracking-[-0.03em]"><span className="intact-mark" style={{ width: 18, height: 18 }} aria-hidden />Intact</Link>
             <p className="mt-2 max-w-md text-[14px] leading-relaxed text-muted">
-              A benchmark for AI agents that move money. Built by{' '}
+              An AI lab for agents that move money. Built by{' '}
               <a href="https://x.com/kairo_v0" className="text-ink underline underline-offset-4">@kairo_v0</a>.
               {' '}Open source on{' '}
               <a href="https://github.com/abubakar2906/Intact" className="text-ink underline underline-offset-4">GitHub</a>.

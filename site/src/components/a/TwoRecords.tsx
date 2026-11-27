@@ -5,7 +5,6 @@ import { hhmm, naira, shortDay, type ExhibitFacts } from '@/lib/exhibit';
 // to arrive just after the call that sent it. Every figure comes from the published run.
 export function TwoRecords({ facts, agent }: { facts: ExhibitFacts; agent: React.ReactNode }) {
   const { first, resend } = facts;
-  const total = first.amountNaira + (resend?.amountNaira ?? 0);
   const last4 = first.account.slice(-4);
   return (
     <figure className="rec">
@@ -31,10 +30,10 @@ export function TwoRecords({ facts, agent }: { facts: ExhibitFacts; agent: React
           </tbody>
           <tfoot>
             <tr>
-              <th scope="row" colSpan={2}>Received for a {naira(first.amountNaira)} invoice</th>
+              <th scope="row" colSpan={2}>Paid for one invoice</th>
               <td>
-                <span className="rec-total-was" aria-hidden>{naira(first.amountNaira)}</span>
-                <span className="rec-total">{naira(total)}</span>
+                <span className="rec-total-was" aria-hidden>Once</span>
+                <span className="rec-total">{resend ? 'Twice' : 'Once'}</span>
               </td>
             </tr>
           </tfoot>
