@@ -1036,3 +1036,86 @@ h1, h2, h3 {
   .only-narrow .tt-name, .only-narrow .os-name { font-size: 14px; }
   .only-narrow .tt-count { font-size: 14px; }
 }
+
+/* ===== Swiss grid (mock-up): a strict grid, all sans, light and large ===== */
+/* 80px margins and 12 columns. Facts and section numbers in the first 3 columns, text in columns 5 to 11,
+   figures across all 12. Geist at 400 for everything but labels; Geist Mono for facts and data.
+   Red only for money that went wrong. */
+.grid-page { --paper: #ffffff; --ink: #0e0e0e; --ink-2: #4b4b4b; --ink-3: #909090; --hair: rgb(0 0 0 / 0.12); --red: #d23b2e;
+  background: var(--paper); color: var(--ink); font-family: var(--font-geist), system-ui, sans-serif; }
+[data-theme='dark'] .grid-page { --paper: #0e0e0e; --ink: #eeeeee; --ink-2: #b4b4b4; --ink-3: #7a7a7a; --hair: rgb(255 255 255 / 0.14); --red: #f0645a; }
+:root:has(.grid-page) { background: #ffffff; }
+:root[data-theme='dark']:has(.grid-page) { background: #0e0e0e; }
+.grid-page h1, .grid-page h2 { font-family: var(--font-geist), system-ui, sans-serif; font-weight: 400; text-wrap: balance; }
+.gp-top { display: flex; align-items: center; justify-content: space-between; height: 72px; margin: 0 80px; border-bottom: 1px solid var(--hair); font-size: 15px; }
+.gp-brand { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.gp-top nav { display: flex; align-items: center; gap: 32px; color: var(--ink-3); }
+.gp-top nav a { transition: color 150ms ease-out; }
+.gp-top nav a:hover { color: var(--ink); }
+.gp-row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin: 0 80px; }
+.gp-side { grid-column: 1 / 4; font: 13px/1.5 var(--font-geist-mono), monospace; color: var(--ink-3); padding-top: 14px; }
+.gp-main { grid-column: 4 / 12; }
+.gp-hero { padding-top: 144px; }
+.grid-page h1 { font-size: 88px; line-height: 0.98; letter-spacing: -0.045em; }
+.gp-text p { margin-top: 24px; font-size: 21px; line-height: 1.55; color: var(--ink-2); max-width: 720px; }
+.gp-text p:first-child { margin-top: 0; }
+.gp-row:not(.gp-hero):not(.gp-section):not(.gp-end) { padding-top: 64px; }
+.gp-facts { display: grid; gap: 10px; align-content: start; padding-top: 6px; }
+.gp-facts div { display: grid; grid-template-columns: 96px 1fr; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+.gp-facts dd { color: var(--ink); }
+.gp-section { padding-top: 160px; }
+.gp-num { font-size: 13px; }
+.grid-page h2 { font-size: 44px; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 32px; max-width: 760px; }
+.grid-page q { quotes: '“' '”'; color: var(--ink); }
+.gp-fig { margin: 96px 80px 0; }
+.gp-fig figcaption { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; margin-top: 20px; font-size: 14px; color: var(--ink-2); }
+.gp-fig figcaption span { grid-column: 1 / 4; font: 13px var(--font-geist-mono), monospace; color: var(--ink-3); }
+.gp-fig figcaption span:last-child { grid-column: 4 / 12; font: inherit; color: var(--ink-2); }
+.gp-end { padding: 160px 0 120px; }
+.gp-small { font-size: 14px; color: var(--ink-3); }
+.grid-page footer .border-line { border-color: var(--hair); }
+
+/* Step charts. */
+.sc-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sc-base { stroke: var(--ink); stroke-width: 1; }
+.sc-col { stroke: var(--hair); stroke-width: 1; }
+.sc-area { fill: var(--red); opacity: 0.08; }
+.sc-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: miter; }
+.sc-num { font: 300 104px var(--font-geist), sans-serif; letter-spacing: -0.05em; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.sc-num.is-wrong { fill: var(--red); }
+.sc-names { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px; }
+.sc-names li { padding: 0 16px; display: grid; gap: 4px; }
+.sc-names li + li { border-left: 1px solid var(--hair); }
+.sc-names b { font-weight: 500; font-size: 16px; }
+.sc-names span { font: 13px var(--font-geist-mono), monospace; color: var(--ink-3); }
+.gp-multiples { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; }
+.sc:not(.sc-big) .sc-num { font: 400 22px var(--font-geist-mono), monospace; letter-spacing: 0; }
+.sc:not(.sc-big) .sc-line { stroke-width: 1.5; }
+.sc-title { margin-bottom: 8px; font-size: 15px; font-weight: 500; padding-top: 12px; border-top: 1px solid var(--ink); }
+/* The step line draws once, left to right; the fill and numerals follow it. */
+[data-js] .sc:not([data-seen]) .sc-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+[data-js] .sc:not([data-seen]) :is(.sc-area, .sc-step) { opacity: 0; }
+.sc[data-seen] .sc-line { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 1100ms cubic-bezier(0.65, 0, 0.35, 1); }
+.sc[data-seen] .sc-area { transition: opacity 500ms ease-out 600ms; }
+.sc[data-seen] .sc-step { transition: opacity 300ms ease-out calc(120ms + var(--i) * 260ms); }
+
+@media (max-width: 900px) {
+  .gp-top, .gp-row, .gp-fig { margin-left: 20px; margin-right: 20px; }
+  .gp-top nav { gap: 16px; }
+  .gp-top nav a:nth-child(2), .gp-top nav a:nth-child(3) { display: none; }
+  .gp-row { grid-template-columns: minmax(0, 1fr); row-gap: 20px; }
+  .gp-side, .gp-main { grid-column: 1 / -1; }
+  .gp-hero { padding-top: 72px; }
+  .gp-hero .gp-side { padding-top: 0; }
+  .grid-page h1 { font-size: 44px; }
+  .grid-page h2 { font-size: 30px; }
+  .gp-text p { font-size: 18px; }
+  .gp-section { padding-top: 112px; }
+  .gp-fig { margin-top: 64px; }
+  .gp-fig figcaption { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+  .gp-fig figcaption span, .gp-fig figcaption span:last-child { grid-column: 1; }
+  .sc-num { font-size: 150px; }
+  .sc-names { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 16px; }
+  .sc-names li:nth-child(3) { border-left: 0; }
+  .gp-multiples { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
