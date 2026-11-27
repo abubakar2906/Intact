@@ -1036,3 +1036,69 @@ h1, h2, h3 {
   .only-narrow .tt-name, .only-narrow .os-name { font-size: 14px; }
   .only-narrow .tt-count { font-size: 14px; }
 }
+
+/* ===== Data as image (mock-up): every try as a strand of ink ===== */
+/* White paper. The headline in Newsreader at display size and weight 400; text and labels in Geist; data in
+   Geist Mono. The image is the data: grey strands for tries that went right, red for tries that paid twice,
+   each with a second strand peeling away. */
+.strands { --paper: #ffffff; --ink: #121212; --ink-2: #474747; --ink-3: #8e8e8e; --hair: rgb(0 0 0 / 0.1); --red: #d23b2e; --amber: #c27c1c; --strand: #b9b9b9;
+  background: var(--paper); color: var(--ink); font-family: var(--font-geist), system-ui, sans-serif; }
+[data-theme='dark'] .strands { --paper: #0e0e0e; --ink: #eeeeee; --ink-2: #b6b6b6; --ink-3: #7c7c7c; --hair: rgb(255 255 255 / 0.12); --red: #f0645a; --amber: #e5a24a; --strand: #4a4a4a; }
+:root:has(.strands) { background: #ffffff; }
+:root[data-theme='dark']:has(.strands) { background: #0e0e0e; }
+.st-top { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 40px; font-size: 15px; }
+.st-brand { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.st-top nav { display: flex; align-items: center; gap: 28px; color: var(--ink-3); }
+.st-top nav a { transition: color 150ms ease-out; }
+.st-top nav a:hover { color: var(--ink); }
+.st-hero { min-height: calc(100svh - 64px); display: flex; flex-direction: column; justify-content: space-between; padding: 72px 40px 32px; }
+.st-copy { max-width: 760px; }
+.strands h1 { font-family: var(--font-serif), Georgia, serif; font-weight: 400; font-size: 76px; line-height: 1.02; letter-spacing: -0.025em;
+  font-variation-settings: 'opsz' 72; text-wrap: balance; }
+.st-copy p { margin-top: 24px; max-width: 560px; font-size: 18px; line-height: 1.55; color: var(--ink-2); }
+.st-field { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px; margin-top: 48px; }
+.st-cluster figcaption { display: grid; gap: 2px; margin-top: 14px; font-size: 15px; }
+.st-cluster figcaption b { font-weight: 500; }
+.st-cluster figcaption span, .st-pair p { font: 13px var(--font-geist-mono), monospace; color: var(--ink-3); }
+.strands .is-wrong { color: var(--red); }
+.st-text { width: min(640px, 100% - 48px); margin: 120px auto 0; }
+.st-text p { margin-top: 20px; font-size: 19px; line-height: 1.6; color: var(--ink-2); }
+.strands h2 { margin-top: 72px; font-family: var(--font-serif), Georgia, serif; font-weight: 400; font-size: 40px; line-height: 1.12; letter-spacing: -0.015em; font-variation-settings: 'opsz' 60; }
+.strands q { quotes: '“' '”'; color: var(--ink); }
+.st-models { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px; width: min(1200px, 100% - 48px); margin: 88px auto 0; }
+.st-model-name { padding-top: 12px; border-top: 1px solid var(--hair); font-size: 15px; font-weight: 500; }
+.st-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.st-pair p { margin-top: 8px; }
+.st-pair p b { font-weight: 500; color: var(--ink); }
+.st-pair p b.is-wrong { color: var(--red); }
+.st-end { padding-bottom: 120px; }
+.st-small { font-size: 13px !important; color: var(--ink-3) !important; }
+.strands footer .border-line { border-color: var(--hair); }
+
+/* The strands. */
+.sf-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sf-ground { stroke: var(--ink); stroke-width: 1; opacity: 0.5; }
+.sf-strand { fill: none; stroke-width: 1.4; stroke-linecap: round; }
+.sf-small .sf-strand { stroke-width: 1.6; }
+.sf-right { stroke: var(--strand); }
+.sf-error { stroke: var(--strand); opacity: 0.6; }
+.sf-escalated { stroke: var(--amber); }
+.sf-wrong, .sf-peel { stroke: var(--red); }
+/* Each strand grows once, from the ground; a second strand peels off a red one after it has grown. */
+[data-js] .sf:not([data-seen]) .sf-strand { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sf[data-seen] .sf-strand { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 900ms cubic-bezier(0.23, 1, 0.32, 1) var(--d); }
+.sf[data-seen] .sf-peel { transition-duration: 700ms; }
+
+@media (max-width: 900px) {
+  .st-top { padding: 0 20px; }
+  .st-top nav { gap: 16px; }
+  .st-top nav a:nth-child(2), .st-top nav a:nth-child(3) { display: none; }
+  .st-hero { min-height: 0; padding: 48px 20px 0; }
+  .strands h1 { font-size: 44px; }
+  .st-copy p { font-size: 17px; }
+  .st-field { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 20px; margin-top: 40px; }
+  .st-text { margin-top: 88px; }
+  .st-text p { font-size: 18px; }
+  .strands h2 { font-size: 30px; margin-top: 56px; }
+  .st-models { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px 20px; }
+}
