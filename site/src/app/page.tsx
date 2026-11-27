@@ -8,10 +8,9 @@ import { experiments, formatDate, getExperimentData, rankModels } from '@/lib/da
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
 
-// The lab's front page, combined: the research note's type and figures (A), on the grid's sidebar (B).
-// Facts and section numbers sit in a narrow column on the left; the text reads in the column beside it;
-// figures run across the full width. Mock-up: the first screen and one section. Every figure is read
-// from the published runs.
+// The lab's front page: a research note on a sidebar grid. Facts and section numbers sit in a narrow column
+// on the left; the text reads in the column beside it; figures run across the full width.
+// Every figure is read from the published runs.
 export default function Home() {
   const exp = experiments[0];
   const data = getExperimentData(exp.slug);
@@ -35,7 +34,6 @@ export default function Home() {
         <nav aria-label="Site">
           <Link href={`/experiments/${exp.slug}`}>Research</Link>
           <Link href="/method">Method</Link>
-          <a href="#platform">Platform</a>
           <a href={GITHUB}>GitHub</a>
           <ThemeToggle />
         </nav>
@@ -95,8 +93,12 @@ export default function Home() {
         </figure>
 
         <section className="nx-row nx-end">
-          <p className="nx-side">Mock-up</p>
-          <p className="nx-main nx-small">The first screen and one section. The rest follows in this style.</p>
+          <p className="nx-side">Read more</p>
+          <div className="nx-main nx-links">
+            <Link href={`/experiments/${exp.slug}`}>Every try in experiment 01</Link>
+            <Link href="/method">How we test and grade</Link>
+            <a href={GITHUB}>Code and transcripts</a>
+          </div>
         </section>
       </main>
       <Footer wide />

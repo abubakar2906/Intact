@@ -836,115 +836,7 @@ h1, h2, h3 {
   .sl-small .sl-pt circle { r: 6; stroke-width: 3; }
 }
 
-/* ===== The lab: white ruled paper, the research set as a ledger ===== */
-/* The page is ledger paper: faint ruled lines every 24px down its whole length, and a double rule down the
-   left margin, like an account book. Every section sits on the same paper, so the page reads as one record.
-   The double rule comes back under every total, the way an accountant closes a column. */
-.lab { --home-page: #ffffff; --paper-rule: rgb(16 24 40 / 0.055); --margin-rule: rgb(16 24 40 / 0.12);
-  position: relative; background-color: var(--home-page);
-  background-image: repeating-linear-gradient(to bottom, transparent 0 23px, var(--paper-rule) 23px 24px); }
-[data-theme='dark'] .lab { --home-page: #0d0d0f; --paper-rule: rgb(255 255 255 / 0.045); --margin-rule: rgb(255 255 255 / 0.1); }
-:root:has(.lab) { background: #ffffff; }
-:root[data-theme='dark']:has(.lab) { background: #0d0d0f; }
-.lab::before { content: ''; position: absolute; top: 0; bottom: 0; left: max(8px, calc(50% - 632px)); width: 4px; pointer-events: none;
-  border-left: 1px solid var(--margin-rule); border-right: 1px solid var(--margin-rule); }
-.lab-top { position: relative; }
-.lab-hero { padding: 120px 0 0; max-width: 880px; }
-.lab h1 { font-size: 72px; line-height: 1; letter-spacing: -0.04em; }
-.lab-hero p { margin-top: 24px; font-size: 21px; line-height: 1.5; color: var(--home-text-2); max-width: 600px; }
-.lab-part { padding-top: 144px; }
-.lab-first { padding-top: 120px; }
-.lab-kicker { display: flex; gap: 16px; font: 13px var(--font-mono); color: var(--home-text-3); }
-.lab-kicker span:first-child { color: var(--home-text); }
-.lab #latest { margin-top: 16px; font-size: 40px; line-height: 1.12; letter-spacing: -0.03em; max-width: 980px; }
-.lab #latest a { background-image: linear-gradient(var(--home-text), var(--home-text)); background-size: 0 1.5px; background-position: 0 92%; background-repeat: no-repeat;
-  transition: background-size 320ms cubic-bezier(0.23, 1, 0.32, 1); }
-.lab #latest a:hover { background-size: 100% 1.5px; }
-.lab .lab-h { font-size: 36px; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 40px; }
-
-/* The try ledger. */
-.lg { width: 100%; margin-top: 48px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.lg th, .lg td { text-align: left; font-weight: 400; padding: 0 16px 0 0; }
-.lg thead th { padding-bottom: 12px; font-size: 13px; color: var(--home-text-3); border-bottom: 1px solid var(--home-text); }
-.lg tbody td { height: 48px; border-bottom: 1px solid var(--home-edge); font-size: 15px; }
-.lg tbody td:nth-child(3) { color: var(--home-text-2); }
-.lg-no { width: 72px; font: 13px var(--font-mono); color: var(--home-text-3); }
-.lg-try { margin-left: 8px; font: 12px var(--font-mono); color: var(--home-text-3); }
-.lg th:last-child, .lg-res { text-align: right !important; padding-right: 0 !important; white-space: nowrap; }
-.lg-res span { font-weight: 500; }
-.lg-twice .lg-res span { color: var(--try-wrong); }
-.lg tbody td:first-child, .lg thead th:first-child, .lg tfoot th { padding-left: 12px; }
-.lg-twice td:first-child { box-shadow: inset 2px 0 0 var(--try-wrong); }
-.lg-once .lg-res span { color: var(--home-text-2); }
-.lg-held .lg-res span { color: var(--gf-wait, #b8741a); }
-.lg-more td { color: var(--home-text-3); }
-.lg tfoot th, .lg tfoot td { padding-top: 20px; padding-bottom: 14px; border-bottom: 3px double var(--home-text); }
-.lg tfoot th { font-size: 16px; font-weight: 500; }
-.lg tfoot td { font-size: 16px; color: var(--home-text-2); }
-.lg tfoot b { font-size: 44px; font-weight: 600; letter-spacing: -0.03em; color: var(--try-wrong); margin-right: 6px; vertical-align: -4px; }
-/* The one moment on load: the lines are written in, one after another. */
-@keyframes lg-write { from { opacity: 0; transform: translateY(4px); } }
-.lg-row { animation: lg-write 420ms cubic-bezier(0.23, 1, 0.32, 1) calc(160ms + var(--i) * 55ms) both; }
-
-/* The statements, one per setup. */
-.stmts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
-.stmt { border-top: 2px solid var(--home-text); padding-top: 16px; display: flex; flex-direction: column; }
-.stmt h3 { font-size: 19px; letter-spacing: -0.01em; }
-.stmt-what { margin-top: 6px; min-height: 44px; font-size: 14px; line-height: 1.5; color: var(--home-text-2); }
-.stmt ul { margin-top: 16px; }
-.stmt li { display: flex; justify-content: space-between; align-items: center; height: 40px; border-top: 1px solid var(--home-edge); font-size: 14px; }
-.stmt-model { display: flex; align-items: center; gap: 8px; color: var(--home-text-2); }
-.stmt li > span:last-child { font: 14px var(--font-mono); }
-.stmt li i { font-style: normal; color: var(--home-text-3); }
-.stmt .is-wrong { color: var(--try-wrong); }
-.stmt-total { margin-top: auto; padding: 16px 0 12px; border-top: 1px solid var(--home-text); border-bottom: 3px double var(--home-text); font-size: 14px; color: var(--home-text-2); }
-.stmt-total b { font-size: 40px; font-weight: 600; letter-spacing: -0.03em; color: var(--home-text); margin-right: 4px; vertical-align: -4px; }
-.stmt-total b.is-wrong { color: var(--try-wrong); }
-.stmts + .home-more { margin-top: 32px; }
-
-.lab-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 56px; }
-.lab-counts div { border-top: 1px solid var(--home-text); padding-top: 12px; }
-.lab-counts dt { font-size: 48px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.1; }
-.lab-counts dd { margin-top: 4px; color: var(--home-text-2); }
-.lab-links { display: flex; gap: 32px; margin-top: 24px; }
-.lab-links .home-more { margin-top: 0; }
-
-/* What we build: one ledger line, stamped by the guard. Green is money kept. */
-.lab-guard { max-width: 720px; }
-.lab-guard > p { font-size: 19px; line-height: 1.5; color: var(--home-text-2); }
-.lab-stamp-line { display: grid; grid-template-columns: 72px 1fr auto; align-items: center; height: 56px; margin-top: 28px;
-  border-top: 1px solid var(--home-text); border-bottom: 1px solid var(--home-edge); font-size: 15px; }
-.lab-stamp { padding: 4px 10px; border: 1.5px solid var(--try-kept); border-radius: 6px; color: var(--try-kept); font-weight: 600; font-size: 13px; transform: rotate(-2deg); }
-.lab .home-close { display: none; }
-
-@media (max-width: 900px) {
-  .lab::before { display: none; }
-  .lab-hero { padding-top: 56px; }
-  .lab h1 { font-size: 44px; }
-  .lab-hero p { font-size: 17px; }
-  .lab-part { padding-top: 96px; }
-  .lab-first { padding-top: 80px; }
-  .lab #latest { font-size: 26px; }
-  .lab .lab-h { font-size: 28px; margin-bottom: 28px; }
-  .lg thead { display: none; }
-  .lg tbody td:nth-child(3) { display: none; }
-  .lg-no { width: 52px; }
-  .lg-res { font-size: 13px; }
-  .lg tfoot th { white-space: normal; font-size: 14px; }
-  .lg tfoot td { font-size: 13px; white-space: normal; line-height: 1.3; }
-  .lg tfoot b { display: block; vertical-align: 0; margin: 0 0 2px; }
-  .lg-try { display: none; }
-  .lg tbody td { font-size: 14px; }
-  .lg tfoot b { font-size: 32px; }
-  .stmts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 16px; }
-  .stmt-what { min-height: 64px; font-size: 13px; }
-  .stmt-model { font-size: 12px; }
-  .lab-counts { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .lab-stamp-line { grid-template-columns: 44px 1fr; height: auto; padding: 12px 0; row-gap: 8px; }
-  .lab-stamp { grid-column: 2; justify-self: start; }
-}
-
-/* ===== The research note (mock-up): text first, figures with taste ===== */
+/* ===== The research note: text first, figures with taste ===== */
 /* White paper and neutral ink. Six sizes: 44 title, 26 section, 19 reading, 15 interface, 13 captions, 12 data.
    Headings and interface in Geist at 500; reading text in Newsreader; data in Geist Mono.
    Red, amber and green appear only inside the figures, each with its one meaning. */
@@ -1062,7 +954,7 @@ h1, h2, h3 {
 
 .sc-names b { font-family: var(--font-geist), sans-serif; }
 
-/* ===== Combined (mock-up): A's type and figures on B's sidebar grid ===== */
+/* ===== The home page: the research note's type and figures on a sidebar grid ===== */
 /* 80px margins and 12 columns. Facts, section numbers and figure numbers in columns 1 to 3; the text reads in
    columns 4 to 9 (about 620px); figures run across all 12. Type and colour are A's: Geist at 500 for headings,
    Newsreader for reading text, Geist Mono for facts and data. */
@@ -1091,7 +983,9 @@ h1, h2, h3 {
 .nx-cap { margin-top: 20px; font-size: 13px; line-height: 1.55; color: var(--ink-3); }
 .nx-cap .nx-side { color: var(--ink); }
 .nx-end { padding: 152px 0 120px; }
-.nx-small { font-size: 13px; color: var(--ink-3); }
+.nx-links { display: flex; flex-wrap: wrap; gap: 12px 32px; font-size: 15px; font-weight: 500; }
+.nx-links a { border-bottom: 1px solid var(--hair); padding-bottom: 2px; transition: border-color 150ms ease-out; }
+.nx-links a:hover { border-color: var(--ink); }
 .nx footer .home-wrap { max-width: none; margin: 0 80px; padding: 0; }
 
 @media (max-width: 900px) {

@@ -59,23 +59,23 @@ cd site && npm run lint && npx tsc --noEmit -p .
 
 ## The site
 
-Live at https://intact-bench.vercel.app. The home and experiment pages were redesigned on 27 November 2026. The method and results-list pages still have the older look.
+Live at https://intact-bench.vercel.app. The home page was redesigned again on 27 November 2026. The experiment, method and results-list pages still have older looks.
 
-**Home page (`site/src/app/page.tsx`).** Problem, fix, results, with as little text as possible (the owner's call on 27 November: show the problem, how it is solved, and the results; no filler).
-- **Hero:** "AI agents pay twice. Intact measures it, and stops it." with `TryField`. No paragraph under it.
-- **The problem** (band): Qwen 3.8 27B's no-hint try 2 (`Exhibit`) beside Chidi's bank statement (`TwoRecords`), replaying when reached (`Play`).
-- **The fix:** `GuardFlow`, the rules as one-line items, the dashboard picture (`ScrollScale`).
-- **The results** (band): `Findings` and `Ladder`.
-- **What is public,** updates, then the close with the gate mark.
-- **Experiment page:** the same hero pair, then chapters: results with a colour key, the beats (one line each) beside their visuals, `ScrollStory` (how Intact grades it), every try with downloads, the setup and limits, the citation.
-- Every figure is read from the published run. The featured try is `exhibit` in `content/experiments.ts`.
+**Home page (`site/src/app/page.tsx`).** Chosen on 27 November from three mock-ups: a research note (A) on a sidebar grid (B). Text is the centrepiece; taste goes into the figures and their motion.
+- **Grid:** 80px margins, 12 columns. Columns 1 to 3 hold "Research lab", the experiment's facts, section numbers and figure numbers; the text reads in columns 4 to 9; figures run across all 12.
+- **Opening:** "Intact is a research lab studying AI agents that move money.", then two paragraphs.
+- **Figure 1:** `grid/StepChart`, the step chart from 29 to 0 across the setups, drawing once.
+- **02, One sentence did what the docs could not,** then **Figure 2:** `note/OneSentence`, each model's ring sliding from its no-hint count to its one-sentence count.
+- **Experiment page:** the earlier chapter layout (`TwoRecords`, `SetupLines`, `ScrollStory`, the try grid). Not yet in the new style.
+- Every figure is read from the published runs. The featured try is `exhibit` in `content/experiments.ts`.
 
 **The look.**
-- **Font:** Google Sans Flex with the roundness axis at 40 (`--font-soft`, set in `layout.tsx`), weight 600 for headings. Geist Mono only for times, counts and small data. The older pages use Inter Tight and Geist.
-- **Colour has one meaning each.** Red is money that went wrong, green is money kept, amber is waiting for a person. Never decoration.
-- **Lit surfaces:** a gradient a little lighter at the top, a 1px edge that catches the light, and almost no drop shadow. The primary button is white on dark and near-black on light.
-- **Logo mark:** a rounded square with a slot cut in it (`.intact-mark` in `globals.css`). It stands for a gate.
-- **Light and dark.** The theme follows the device until someone picks one. The pick is saved in `localStorage` under `intact-theme` and applied before first paint by the script in `layout.tsx`. All home tokens are in `globals.css` under `.home` and `[data-theme='dark'] .home`. The canvas reads the `--try-*` variables and redraws when the theme changes.
+- **Ground:** white by default; dark only when someone picks it (saved under `intact-theme`, applied before first paint by `layout.tsx`).
+- **Type:** Geist at 500 for headings and interface, Newsreader for reading text, Geist Mono for facts and data. Six sizes. The experiment page still uses Google Sans Flex.
+- **Colour has one meaning each,** and only inside the data: red is money that went wrong, green is money kept, amber is a person deciding.
+- **No cards, shadows or gradients** on the home page. Hairlines and space.
+- **Copy:** outcomes as paid once or twice, not amounts. No country in the copy; the transcripts keep their real details.
+- **Logo mark:** a rounded square with a slot cut in it (`.intact-mark`). Tokens for the home page are under `.note` and `.nx` in `globals.css`.
 
 **Design skills, in this order:** frontend-design for direction, dataviz for charts, emil-design-eng for interactions and motion, then unslop as the final pass. Respect `prefers-reduced-motion`.
 
@@ -83,8 +83,8 @@ Live at https://intact-bench.vercel.app. The home and experiment pages were rede
 
 As of 27 November, after the chapters redesign:
 
-1. **Keep text short.** A heading and the visual. Add a sentence only when the visual cannot say it.
-2. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
-3. **The red glow on the hero blocks:** unslop counts coloured glows as a tell. The owner has not decided.
+1. **Bring the experiment page into the home page's style,** then the method page. Text first, figures with numbered captions, the sidebar for facts.
+2. **Platform on the home page:** it is no longer there. Add it back in this style when the owner asks.
+3. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
 4. **Design skills** are in `.claude/skills/`: frontend-design (Anthropic, Apache 2.0), emil-design-eng and choreograph (Emil Kowalski, MIT), unslop (CC BY 4.0). Use them in that order, with dataviz for charts.
 5. **Dev server note:** Turbopack's Tailwind loader can keep serving old CSS. Restart `next dev` with `.next/dev` removed after CSS edits, and never run `next build` beside a running dev server.
