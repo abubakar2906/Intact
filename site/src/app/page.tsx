@@ -69,10 +69,14 @@ export default function Home() {
           </div>
 
           <figure className="home-shot" id="platform">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="home-shot-light" src="/img/platform-light.webp" width={2880} height={1800} alt={SHOT_ALT} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="home-shot-dark" src="/img/platform.webp" width={2880} height={1800} alt={SHOT_ALT} loading="lazy" />
+            {/* Both pictures load up front and sit in the same spot. The dark one lies on top and fades in and out
+                with the theme, so a switch never waits on a download. The light one stays opaque underneath. */}
+            <div className="home-shot-stack">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="home-shot-light" src="/img/platform-light.webp" width={2880} height={1800} alt={SHOT_ALT} fetchPriority="high" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="home-shot-dark" src="/img/platform.webp" width={2880} height={1800} alt="" aria-hidden />
+            </div>
           </figure>
         </div>
       </header>
