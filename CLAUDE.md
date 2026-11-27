@@ -59,21 +59,23 @@ cd site && npm run lint && npx tsc --noEmit -p .
 
 ## The site
 
-Live at https://intact-bench.vercel.app. The home page was redesigned again on 27 November 2026. The experiment, method and results-list pages still have older looks.
+Live at https://intact-bench.vercel.app. The home, experiment and method pages share one style (27 November 2026). The results list (`/experiments`) still has the older look.
 
 **Home page (`site/src/app/page.tsx`).** Chosen on 27 November from three mock-ups: a research note (A) on a sidebar grid (B). Text is the centrepiece; taste goes into the figures and their motion.
 - **Grid:** 80px margins, 12 columns. Columns 1 to 3 hold "Research lab", the experiment's facts, section numbers and figure numbers; the text reads in columns 4 to 9; figures run across all 12.
 - **Opening:** "Intact is a research lab studying AI agents that move money.", then two paragraphs.
 - **Figure 1:** `grid/StepChart`, the step chart from 29 to 0 across the setups, drawing once.
 - **02, One sentence did what the docs could not,** then **Figure 2:** `note/OneSentence`, each model's ring sliding from its no-hint count to its one-sentence count.
-- **Experiment page:** the earlier chapter layout (`TwoRecords`, `SetupLines`, `ScrollStory`, the try grid). Not yet in the new style.
+- **Experiment page:** the same grid. Numbered sections, each with its figure: the try beside the bank's record (`TwoRecords`, `Exhibit`), a `StepChart` per model, `OneSentence` for the split (no hint to the docs note), the one slip with its whole reply, the public tally, then how grading works, every try (`TryGrid`), the setup, limits and citation.
+- **Method page:** the same grid: the payment system, the tools, the traps (from the data), grading with one try as its figure, the public tally, the rules.
+- **Shared:** `NxHeader`. Older pieces read the lab's tokens through aliases under `.nx` in `globals.css`, so they come out flat.
 - Every figure is read from the published runs. The featured try is `exhibit` in `content/experiments.ts`.
 
 **The look.**
 - **Ground:** white by default; dark only when someone picks it (saved under `intact-theme`, applied before first paint by `layout.tsx`).
-- **Type:** Geist at 500 for headings and interface, Newsreader for reading text, Geist Mono for facts and data. Six sizes. The experiment page still uses Google Sans Flex.
+- **Type:** Geist at 500 for headings and interface, Newsreader for reading text, Geist Mono for facts and data. Six sizes.
 - **Colour has one meaning each,** and only inside the data: red is money that went wrong, green is money kept, amber is a person deciding.
-- **No cards, shadows or gradients** on the home page. Hairlines and space.
+- **No cards, shadows or gradients.** Hairlines and space.
 - **Copy:** outcomes as paid once or twice, not amounts. No country in the copy; the transcripts keep their real details.
 - **Logo mark:** a rounded square with a slot cut in it (`.intact-mark`). Tokens for the home page are under `.note` and `.nx` in `globals.css`.
 
@@ -83,7 +85,7 @@ Live at https://intact-bench.vercel.app. The home page was redesigned again on 2
 
 As of 27 November, after the chapters redesign:
 
-1. **Bring the experiment page into the home page's style,** then the method page. Text first, figures with numbered captions, the sidebar for facts.
+1. **Bring the results list (`/experiments`) into the same style.** The method and experiment pages are done.
 2. **Platform on the home page:** it is no longer there. Add it back in this style when the owner asks.
 3. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
 4. **Design skills** are in `.claude/skills/`: frontend-design (Anthropic, Apache 2.0), emil-design-eng and choreograph (Emil Kowalski, MIT), unslop (CC BY 4.0). Use them in that order, with dataviz for charts.
