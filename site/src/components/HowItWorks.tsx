@@ -1,41 +1,40 @@
 import { HOW_STEPS } from '@/content/how-it-works';
-import type { Exhibit } from '@/content/experiments';
+import { describeCall } from '@/lib/describe';
+import type { ExhibitFacts } from '@/lib/exhibit';
 
-const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
-
-// Direction A: the four steps, each over the thing it produces. The artifacts are the stale payout's own
-// records, so the steps read as one payment's path: the trap, the message, the calls, the grade.
-export function HowItWorks({ first }: { first?: Exhibit['first'] }) {
-  const ref = first?.reference ?? 'TRF-INV-88';
-  const amt = naira(first?.amountNaira ?? 250000);
-  const twice = naira((first?.amountNaira ?? 250000) * 2);
-  const day = first ? new Date(first.credited).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '21 Nov';
+// Direction B: the anatomy of one real try. Each step beside the record it leaves, in the shapes
+// the benchmark actually uses: the two records, the message and tools, the calls, the grade.
+export function HowItWorks({ facts, tools }: { facts?: ExhibitFacts | null; tools?: string[] }) {
+  if (!facts) return null;
+  const { run, first } = facts;
+  const calls = run.steps.filter((s) => s.kind === 'tool');
   const art = [
-    <div key="trap" className="art art-trap">
-      <p><span>Ledgerline</span><b>failed</b></p>
-      <p><span>The bank</span><b>credited {day}</b></p>
+    <pre key="trap" className="code">{`Ledgerline  get_transfer("${first.reference}")
+  status: "failed"
+
+The bank    verify_transfer("${first.reference}")
+  bank_status: "success"
+  credited_at: ${first.credited.slice(0, 16).replace('T', ' ')}`}</pre>,
+    <div key="agent" className="code">
+      <p className="code-msg">“{run.message}”</p>
+      <p className="code-dim">tools: {(tools ?? []).join(', ')}</p>
     </div>,
-    <div key="agent" className="art art-msg">
-      <p>“Your side shows transfer {ref} as failed. Please resend it.”</p>
-    </div>,
-    <div key="record" className="art art-log">
-      <p>get_transfer <span>{ref}</span></p>
-      <p className="is-wrong">create_transfer <span>{amt}</span></p>
-      <p>send_reply</p>
-    </div>,
-    <div key="grade" className="art art-grade">
-      <p className="art-grade-fig">{twice}</p>
-      <p>for a {amt} invoice</p>
-      <p><span className="art-chip">Paid twice</span></p>
+    <pre key="record" className="code">{calls.map((s, i) => `${i + 1}  ${s.name}  ${s.name === 'send_reply' ? '' : describeCall(s.name, s.args)}`).join('\n')}</pre>,
+    <div key="grade" className="code">
+      <p className={run.money.ok ? '' : 'is-wrong'}>money: {run.money.note}</p>
+      {run.truth && <p className={run.truth.ok ? 'code-dim' : 'is-wrong'}>truth: {run.truth.note}</p>}
     </div>,
   ];
   return (
-    <ol className="how-a">
+    <ol className="how-b">
       {HOW_STEPS.map((s, i) => (
         <li key={s.title}>
+          <div className="how-b-text">
+            <span className="how-n">{i + 1}</span>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+          </div>
           {art[i]}
-          <h3><span className="how-n">{i + 1}</span>{s.title}</h3>
-          <p>{s.body}</p>
         </li>
       ))}
     </ol>

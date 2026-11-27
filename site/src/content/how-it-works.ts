@@ -12,7 +12,8 @@ export const PLATFORM = {
   body: 'It sits between your agents and your payment provider. Each payment it lets through, refuses with a reason the agent can read, or holds for you.',
   rules: [
     { title: 'Check before a repeat', body: 'A second payment for the same invoice waits until the first is checked with the bank.' },
-    { title: 'Hold even when told to pay', body: 'If the first payment arrived, the repeat is refused, even when the person asking insists.' },
+    // Held back until the owner chooses to say it in public: it comes from the private platform plan.
+    // { title: 'Hold even when told to pay', body: 'If the first payment arrived, the repeat is refused, even when the person asking insists.' },
     { title: 'You approve big payments', body: 'Anything over your amount waits for you to approve or decline.' },
     { title: 'Every decision is recorded', body: 'With the rule and the reason, so you can see why money moved or didn’t.' },
   ],

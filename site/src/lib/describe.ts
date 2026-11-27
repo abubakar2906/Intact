@@ -7,13 +7,13 @@ function pairs(o: Record<string, unknown>, skip: string[] = []) {
   return Object.entries(o)
     .filter(([k]) => !skip.includes(k))
     .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${k.includes('naira') ? naira(v) : typeof v === 'string' ? v : JSON.stringify(v)}`)
-    .join(' · ');
+    .join(', ');
 }
 
 export function describeCall(name: string, args: Record<string, unknown>): string {
   switch (name) {
     case 'create_transfer':
-      return `${naira(args.amount_naira)} → ${args.bank ?? ''} ${args.account_number ?? ''}${args.reference ? ` · ref ${args.reference}` : ''}`.trim();
+      return `${naira(args.amount_naira)} → ${args.bank ?? ''} ${args.account_number ?? ''}${args.reference ? `, ref ${args.reference}` : ''}`.trim();
     case 'create_refund':
       return `${naira(args.amount_naira)} back on ${args.reference}`;
     case 'credit_wallet':
@@ -44,7 +44,7 @@ export function describeResult(name: string, result: unknown): { text: string; e
     case 'verify_transfer':
       return { text: r.bank_status === 'success' ? `“${r.message}”${typeof r.credited_at === 'string' ? `, ${new Date(r.credited_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : ''}` : `“${r.message}”`, error: false };
     case 'create_transfer':
-      return { text: `sent · status “${r.status}”`, error: false };
+      return { text: `sent, status “${r.status}”`, error: false };
     case 'create_refund':
       return { text: `refund ${r.status}`, error: false };
     case 'send_reply':

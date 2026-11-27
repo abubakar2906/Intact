@@ -5,6 +5,7 @@ import { HomeNav } from '@/components/HomeNav';
 import { Footer } from '@/components/Footer';
 import { Ladder } from '@/components/a/Ladder';
 import { TwoRecords } from '@/components/a/TwoRecords';
+import { Exhibit } from '@/components/b/Exhibit';
 import { exhibitFacts } from '@/lib/exhibit';
 import { ModelSplit } from '@/components/ModelSplit';
 import { RunCard } from '@/components/RunCard';
@@ -58,7 +59,12 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
             </div>
             <p className="exp-meta">Experiment {n}, published {formatDate(exp.date)}</p>
           </div>
-          {facts && <TwoRecords facts={facts} setupName={exp.setups.find((s) => s.id === facts.run.condition)?.name ?? facts.run.setupName} payer="Mama’s Kitchen" />}
+          {facts && (
+            <TwoRecords
+              facts={facts}
+              agent={<Exhibit facts={facts} setupName={exp.setups.find((s) => s.id === facts.run.condition)?.name ?? facts.run.setupName} wrongLabel={exp.wrong} />}
+            />
+          )}
         </div>
       </header>
 
@@ -71,7 +77,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <ChartFrame
             level={2}
             title="What each setup told the agent"
-            definition={`Every try, one square each, grouped by model. Red means it ${wrong}.`}
+            definition={`Every try, one square each, grouped by model. Red means it ${wrong}, grey that it got it right, an outline that it handed the case to a person.`}
             lowerIsBetter
           >
             <Ladder exp={exp} data={data} />
@@ -101,7 +107,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
                 {run && (
                   <p className="mt-6 text-[15px] text-muted">
                     <ModelName id={run.model} size={18} className="font-medium text-ink" />
-                    <span className="ml-1"> · {run.setupName} · try {run.sample}</span>
+                    <span>, {run.setupName.toLowerCase()}, try {run.sample}</span>
                   </p>
                 )}
               </div>
@@ -139,7 +145,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <p className="exp-body">
             The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.
           </p>
-          <div className="mt-10"><HowItWorks first={exp.exhibit?.first} /></div>
+          <div className="mt-10"><HowItWorks facts={facts} tools={method.tools.map((t) => t.name)} /></div>
         </section>
 
         <section id="every-try" className="exp-part scroll-mt-8">

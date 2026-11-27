@@ -314,7 +314,7 @@ h1, h2, h3 {
   --color-redwash: rgb(240 100 90 / 0.1);
   --color-correct: #3b3b41;
 }
-.exp .uppercase { text-transform: none; letter-spacing: 0; }
+.home .uppercase { text-transform: none; letter-spacing: 0; }
 .exp h1 { font-size: 52px; line-height: 1.04; letter-spacing: -0.035em; max-width: 980px; }
 .exp h2 { font-size: 34px; line-height: 1.1; letter-spacing: -0.025em; }
 .exp h3 { letter-spacing: -0.01em; }
@@ -383,8 +383,8 @@ h1, h2, h3 {
 .how p { margin-top: 8px; color: var(--home-text-2); line-height: 1.55; }
 /* What the platform does. */
 .home-sub { margin-top: 16px; color: var(--home-text-2); font-size: 18px; line-height: 1.55; max-width: 620px; }
-.home-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; margin-top: 40px; }
-.home-rules li { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 16px 0; border-top: 1px solid var(--home-edge); }
+.home-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 32px; margin-top: 40px; }
+.home-rules li { display: grid; gap: 6px; align-content: start; padding: 16px 0; border-top: 1px solid var(--home-edge); }
 .home-rules b { font-weight: 600; }
 .home-rules span { color: var(--home-text-2); }
 .home-note { margin-top: 24px; color: var(--home-text-3); font-size: 14px; max-width: 620px; }
@@ -403,25 +403,19 @@ h1, h2, h3 {
 [data-theme='dark'] .exp { --rec-wash: rgb(240 100 90 / 0.1); --sq-right: #2c2c31; }
 
 /* The hero: what Ledgerline told the agent, beside what the bank did. */
-.rec { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; margin: 56px 0 0; padding-bottom: 88px; }
-.rec-said, .rec-bank { border-radius: 16px; background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom));
+.rec { display: grid; gap: 20px; margin: 56px 0 0; padding-bottom: 88px; }
+.rec { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; }
+.rec-bank { position: sticky; top: 24px; }
+.rec-bank { border-radius: 16px; background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom));
   box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 24px 60px var(--home-frame-drop); }
-.rec-said { display: flex; flex-direction: column; padding: 24px; }
-.rec-src { font-size: 13px; color: var(--home-text-3); }
-.rec-ref { margin-top: 20px; font: 13px var(--font-mono); color: var(--home-text-2); }
-.rec-amt { margin-top: 4px; font-size: 36px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.rec-status { margin-top: 14px; }
-.rec-status span { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 11px; border-radius: 8px; font: 13px var(--font-mono); color: var(--home-text-2);
-  background: var(--home-frame); box-shadow: inset 0 0 0 1px var(--home-edge); }
-.rec-status span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--home-text-3); }
-.rec-foot { margin-top: auto; padding-top: 24px; font-size: 14px; color: var(--home-text-2); }
+.rec-src { font-size: 14px; color: var(--home-text-2); }
+.rec-src b { display: block; margin-bottom: 2px; font-weight: 600; color: var(--home-text); }
 .rec-bank { padding: 24px 28px 8px; }
 .rec-bank table { width: 100%; margin-top: 12px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 .rec-bank th, .rec-bank td { text-align: left; padding: 14px 12px 14px 0; font-weight: 400; }
 .rec-bank thead th { font-size: 12px; color: var(--home-text-3); padding-top: 4px; padding-bottom: 10px; }
 .rec-bank tbody td { border-top: 1px solid var(--home-edge); font-size: 15px; }
 .rec-bank tbody td:nth-child(1), .rec-bank tbody td:nth-child(2) { font: 13px var(--font-mono); color: var(--home-text-2); white-space: nowrap; }
-.rec-bank tbody td:nth-child(3) { color: var(--home-text-2); }
 .rec-bank th:last-child, .rec-bank td:last-child { text-align: right; padding-right: 0; font-weight: 600; white-space: nowrap; }
 .rec-new td { background: var(--rec-wash); color: var(--try-wrong) !important; }
 .rec-new td:first-child { box-shadow: inset 2px 0 0 var(--try-wrong); padding-left: 10px; }
@@ -429,7 +423,6 @@ h1, h2, h3 {
 .rec-bank tfoot th { font-size: 15px; font-weight: 500; }
 .rec-bank tfoot td { position: relative; font-size: 28px; letter-spacing: -0.02em; color: var(--try-wrong); }
 .rec-total-was { position: absolute; right: 0; top: 18px; color: var(--home-text); opacity: 0; }
-.rec figcaption { grid-column: 1 / -1; max-width: 760px; font-size: 15px; line-height: 1.55; color: var(--home-text-2); }
 /* The one moment: the agent's second payment lands on the statement, and the total turns from one payment to two. */
 @keyframes rec-land { from { opacity: 0; transform: translateY(-10px); } }
 /* A slight blur while the totals swap, so the old and new figures read as one number changing. */
@@ -457,27 +450,6 @@ h1, h2, h3 {
 .ladder-count b { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--home-text); margin-right: 4px; font-variant-numeric: tabular-nums; }
 .ladder-count b.is-wrong { color: var(--try-wrong); }
 
-/* How it works: each step over the record it produces, along one payment's path. */
-.how-a { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 48px; }
-.how-a .art { position: relative; height: 148px; padding: 16px; border-radius: 14px; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-size: 14px;
-  background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom)); box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 1px 2px var(--home-drop); }
-.how-a li:not(:last-child) .art::after { content: ''; position: absolute; top: 50%; right: -24px; width: 24px; height: 1px; background: var(--home-text-3); opacity: 0.5; }
-.how-a h3 { display: flex; align-items: baseline; gap: 10px; margin-top: 20px; font-size: 18px; letter-spacing: -0.01em; }
-.how-a .how-n { font: 13px var(--font-mono); color: var(--home-text-3); }
-.how-a li > p { margin-top: 8px; color: var(--home-text-2); line-height: 1.55; }
-.art-trap p { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--home-edge); }
-.art-trap p:first-child { border-top: 0; }
-.art-trap span { color: var(--home-text-3); }
-.art-trap b { font-weight: 500; font-family: var(--font-mono); font-size: 13px; }
-.art-msg p { padding: 12px 14px; border-radius: 14px 14px 14px 4px; background: var(--home-frame); box-shadow: inset 0 0 0 1px var(--home-edge); line-height: 1.45; }
-.art-log p { font: 12.5px/1.5 var(--font-mono); color: var(--home-text); }
-.art-log span { color: var(--home-text-3); }
-.art-log p.is-wrong, .art-log p.is-wrong span { color: var(--try-wrong); }
-.art-grade { align-items: flex-start; }
-.art-grade p { color: var(--home-text-3); }
-.art-grade .art-grade-fig { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: var(--try-wrong); }
-.art-chip { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #fff; background: var(--try-wrong); }
-
 @media (max-width: 900px) {
   .exp .exp-intro { padding-top: 32px; }
   .rec { grid-template-columns: minmax(0, 1fr); margin-top: 40px; padding-bottom: 64px; }
@@ -490,8 +462,7 @@ h1, h2, h3 {
   .rec-bank tbody td, .rec-bank tfoot th, .rec-bank tfoot td { border-top: 0; padding: 0; }
   .rec-bank tbody td:nth-child(1) { grid-row: 1; }
   .rec-bank tbody td:nth-child(2) { grid-row: 2; }
-  .rec-bank tbody td:nth-child(3) { display: none; }
-  .rec-bank tbody td:nth-child(4) { grid-row: 1 / 3; grid-column: 2; align-self: center; }
+  .rec-bank tbody td:nth-child(3) { grid-row: 1 / 3; grid-column: 2; align-self: center; }
   .rec-new { margin: 0 -16px; padding: 12px 16px !important; background: var(--rec-wash); box-shadow: inset 2px 0 0 var(--try-wrong); }
   .rec-new td, .rec-new td:first-child { background: none; box-shadow: none; padding-left: 0; }
   .rec-bank tfoot tr { align-items: center; padding: 16px 0; }
@@ -505,6 +476,76 @@ h1, h2, h3 {
   .ladder-model { grid-template-columns: repeat(10, 5px); gap: 1px; }
   .ladder-model i { width: 5px; height: 14px; border-radius: 1px; }
   .ladder-count b { font-size: 26px; }
-  .how-a { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-  .how-a li:not(:last-child) .art::after { display: none; }
+}
+
+/* ===== The agent's record (the exhibit) and How it works ===== */
+.exp { --exb-wash: rgb(224 72 61 / 0.06); }
+[data-theme='dark'] .exp { --exb-wash: rgb(240 100 90 / 0.09); }
+
+/* The hero: one try, set large as evidence, with notes in the margin. */
+.exb { margin: 56px 0 0; padding: 32px 40px 16px; border-radius: 18px; margin-bottom: 88px;
+  background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom));
+  box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 24px 60px var(--home-frame-drop); }
+.exb-who { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--home-text-2); }
+.exb-msg { margin-top: 20px; max-width: 720px; padding: 16px 20px; border-radius: 18px 18px 18px 6px; background: var(--home-frame); box-shadow: inset 0 0 0 1px var(--home-edge); }
+.exb-msg p:last-child { margin-top: 4px; font-size: 18px; line-height: 1.5; }
+.exb-from { font-size: 13px; color: var(--home-text-3); }
+.exb-steps { margin-top: 24px; }
+.exb-steps li { display: grid; grid-template-columns: 32px minmax(0, 1fr) 280px; gap: 24px; align-items: start; padding: 20px 0; border-top: 1px solid var(--home-edge); }
+.exb-n { font: 14px/28px var(--font-mono); color: var(--home-text-3); }
+.exb-call code { font: 18px/28px var(--font-mono); color: var(--home-text); overflow-wrap: anywhere; }
+.exb-call code span { color: var(--home-text-2); }
+.exb-call p { margin-top: 4px; font: 14px/1.55 var(--font-mono); color: var(--home-text-2); }
+.exb-steps li:last-child .exb-call p { font: 16px/1.5 var(--font-soft), var(--font-sans); color: var(--home-text); max-width: 620px; }
+.exb-note { font-size: 15px; line-height: 1.45; padding-left: 14px; border-left: 2px solid var(--home-edge); }
+.exb-steps li.is-wrong { margin: 0 -40px; padding-left: 40px; padding-right: 40px; background: var(--exb-wash); box-shadow: inset 3px 0 0 var(--try-wrong); }
+.exb-steps li.is-wrong .exb-n, .exb-steps li.is-wrong code, .exb-steps li.is-wrong code span, .exb-steps li.is-wrong .exb-call p { color: var(--try-wrong); }
+.exb-steps li.is-wrong .exb-note { color: var(--try-wrong); border-color: var(--try-wrong); }
+.exb-tag { display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 6px; font: 600 12px var(--font-soft), var(--font-sans); color: #fff; background: var(--try-wrong); vertical-align: 1px; }
+/* The one moment: the run replays in order. Notes fade in just after their step. */
+@keyframes exb-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes exb-fade { from { opacity: 0; } }
+.exb-msg, .exb-steps li { animation: exb-in 520ms cubic-bezier(0.23, 1, 0.32, 1) var(--d, 0ms) both; }
+.exb-note { animation: exb-fade 320ms ease-out calc(var(--d, 0ms) + 160ms) both; }
+
+
+/* How it works: the anatomy of one real try, each step beside the record it leaves. */
+.how-b { margin-top: 40px; }
+.how-b li { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 56px; padding: 32px 0; border-top: 1px solid var(--home-edge); }
+.how-b .how-n { font: 13px var(--font-mono); color: var(--home-text-3); }
+.how-b h3 { margin-top: 8px; font-size: 20px; letter-spacing: -0.01em; }
+.how-b-text p { margin-top: 8px; color: var(--home-text-2); line-height: 1.55; }
+.code { align-self: start; margin: 0; padding: 18px 20px; border-radius: 12px; font: 13px/1.7 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; color: var(--home-text);
+  background: linear-gradient(180deg, var(--home-card-top), var(--home-card-bottom)); box-shadow: inset 0 1px 0 var(--home-lit), inset 0 0 0 1px var(--home-edge), 0 1px 2px var(--home-drop); }
+.code .code-msg { font: 15px/1.5 var(--font-soft), var(--font-sans); }
+.code .code-dim { margin-top: 10px; color: var(--home-text-3); }
+.code .is-wrong { color: var(--try-wrong); }
+
+@media (max-width: 900px) {
+  .exb { margin-top: 40px; margin-bottom: 64px; padding: 20px 16px 8px; }
+  .exb-msg p:last-child { font-size: 16px; }
+  .exb-steps li { grid-template-columns: 20px minmax(0, 1fr); gap: 4px 12px; }
+  .exb-steps li .exb-note { grid-column: 2; margin-top: 8px; }
+  .exb-call code { font-size: 15px; line-height: 24px; }
+  .exb-n { line-height: 24px; }
+  .exb-steps li.is-wrong { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .how-b li { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 24px 0; }
+}
+
+.rec .exb { margin: 0; padding: 24px 28px 8px; }
+.rec .exb-steps li { grid-template-columns: 24px minmax(0, 1fr); gap: 4px 14px; padding: 16px 0; }
+.rec .exb-steps li .exb-note { grid-column: 2; margin-top: 8px; }
+.rec .exb-call code { font-size: 16px; line-height: 26px; }
+.rec .exb-n { line-height: 26px; }
+.rec .exb-msg p:last-child { font-size: 16px; }
+.rec .exb-steps li.is-wrong { margin: 0 -28px; padding-left: 28px; padding-right: 28px; }
+.exb-who b { font-weight: 600; color: var(--home-text); margin-right: 4px; }
+@media (max-width: 1100px) {
+  .rec { grid-template-columns: minmax(0, 1fr); }
+  .rec-bank { position: static; }
+}
+@media (max-width: 900px) {
+  .rec .exb { padding: 20px 16px 8px; }
+  .rec .exb-steps li.is-wrong { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .rec .exb-call code { font-size: 15px; line-height: 24px; }
 }

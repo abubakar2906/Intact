@@ -9,6 +9,7 @@ import { Updates } from '@/components/Updates';
 import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
 import { experiments, getExperimentData, method, rankModels } from '@/lib/data';
+import { exhibitFacts } from '@/lib/exhibit';
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
 const X = 'https://x.com/kairo_v0';
@@ -105,7 +106,7 @@ export default function Home() {
 
         <section className="home-wrap home-part" aria-labelledby="how-h">
           <h2 id="how-h">How the benchmark works</h2>
-          <HowItWorks first={latest.exhibit?.first} />
+          <HowItWorks facts={exhibitFacts(latest, data)} tools={method.tools.map((t) => t.name)} />
         </section>
 
         <section className="home-wrap home-part" aria-labelledby="results">
@@ -125,7 +126,7 @@ export default function Home() {
               <li key={r.title}><b>{r.title}</b><span>{r.body}</span></li>
             ))}
           </ul>
-          <p className="home-note">In the benchmark, a lock in the transfer tool stopped every repeat payment: {data.totals.D ? `${data.totals.D.wrong} of ${data.totals.D.n}` : 'none got through'}. The guard is that lock, made stronger. In private testing now.</p>
+          <p className="home-note">In the benchmark, a lock in the transfer tool stopped every repeat payment: {data.totals.D ? `${data.totals.D.wrong} of ${data.totals.D.n}` : 'none got through'}. The guard is in private testing now.</p>
         </section>
 
         <section className="home-wrap home-part home-updates" aria-labelledby="updates">
