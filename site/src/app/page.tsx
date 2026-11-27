@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Footer } from '@/components/Footer';
 import { ResultsTable } from '@/components/ResultsTable';
 import { TryField, type FieldTag } from '@/components/TryField';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { HomeNav } from '@/components/HomeNav';
 import { Updates } from '@/components/Updates';
 import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
@@ -46,20 +46,7 @@ export default function Home() {
     <div className="home">
       <header className="home-hero">
         <div className="home-wrap">
-          <nav className="home-nav" aria-label="Site">
-            <Link href="/" className="home-brand"><span className="intact-mark" aria-hidden />Intact</Link>
-            <ul>
-              <li><a href="#research">Research</a></li>
-              <li><a href="#platform">Platform</a></li>
-              <li><Link href="/method">Method</Link></li>
-              <li><a href="#updates">Updates</a></li>
-            </ul>
-            <div className="home-nav-right">
-              <a href={GITHUB}>GitHub</a>
-              <Link href={`/experiments/${latest.slug}`} className="home-btn home-btn-main home-btn-sm">See the results</Link>
-              <ThemeToggle />
-            </div>
-          </nav>
+          <HomeNav home cta={{ href: `/experiments/${latest.slug}`, label: 'See the results' }} />
 
           <div className="home-hero-grid">
             <div>
