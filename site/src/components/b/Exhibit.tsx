@@ -6,11 +6,14 @@ import { hhmm, naira, shortDay, type ExhibitFacts } from '@/lib/exhibit';
 // The agent's own tool calls are the evidence, so one try is set large, in order, with a note
 // beside each step saying what the agent could not see. The left half of the hero (TwoRecords).
 // The notes are worked out from the run and the scenario's bank record, never typed per try.
-export function Exhibit({ facts, setupName, wrongLabel }: { facts: ExhibitFacts; setupName: string; wrongLabel: string }) {
+// `fullReply` shows the agent's whole reply, for a try where what it said is the point.
+export function Exhibit({ facts, setupName, wrongLabel, fullReply = false }: { facts: ExhibitFacts; setupName: string; wrongLabel: string; fullReply?: boolean }) {
   const { run, first } = facts;
   const tools = run.steps.filter((s) => s.kind === 'tool');
   const total = first.amountNaira + (facts.resend?.amountNaira ?? 0);
-  const note = (name: string, args: Record<string, unknown>): string | null => {
+  const sentAt = tools.findIndex((t) => t.name === 'create_transfer');
+  const note = (name: string, args: Record<string, unknown>, i: number): string | null => {
+    if (name === 'verify_transfer' && args.reference === first.reference && sentAt >= 0 && sentAt < i) return 'It checked with the bank after resending. Already credited.';
     if (name === 'get_transfer' && args.reference === first.reference) return `Out of date. The bank credited this on ${shortDay(first.credited)} at ${hhmm(first.credited)}.`;
     if (name === 'create_transfer') return `The second ${naira(Number(args.amount_naira))}. ${first.payee} was already paid.`;
     if (name === 'verify_transfer' && args.reference !== first.reference) return facts.checkedFirstWithBank ? 'It asked the bank about the new payment.' : 'It asked the bank about the new payment. Never the first.';
@@ -19,7 +22,7 @@ export function Exhibit({ facts, setupName, wrongLabel }: { facts: ExhibitFacts;
     return null;
   };
   // The reply, cut to its first two sentences: enough to show what the agent claimed.
-  const reply = run.reply ? run.reply.split(/(?<=[.!?])\s+/).slice(0, 2).join(' ') : null;
+  const reply = !run.reply ? null : fullReply ? run.reply : run.reply.split(/(?<=[.!?])\s+/).slice(0, 2).join(' ');
   // The replay: steps arrive in the order the agent made them, with shrinking gaps, so it reads as one run.
   const DELAY = [0, 220, 420, 590, 730, 850, 950];
   const d = (i: number) => `${DELAY[Math.min(i, DELAY.length - 1)] + 120 * Math.max(0, i - DELAY.length + 1)}ms`;
@@ -39,13 +42,13 @@ export function Exhibit({ facts, setupName, wrongLabel }: { facts: ExhibitFacts;
         {tools.map((s, i) => {
           n++;
           const bad = run.verdict === 'wrong' && MOVES_MONEY.includes(s.name) && !(s.result && typeof s.result === 'object' && 'error' in s.result);
-          const text = note(s.name, s.args);
+          const text = note(s.name, s.args, i);
           return (
             <li key={i} className={bad ? 'is-wrong' : undefined} style={{ '--d': d(n) } as React.CSSProperties}>
               <span className="exb-n">{n}</span>
               <div className="exb-call">
                 <code>{s.name} <span>{s.name === 'send_reply' ? '' : describeCall(s.name, s.args)}</span></code>
-                <p>{s.name === 'send_reply' && reply ? `“${reply}”` : describeResult(s.name, s.result).text}{bad && <b className="exb-tag">{wrongLabel}</b>}</p>
+                <p className={s.name === 'send_reply' && fullReply ? 'exb-full' : undefined}>{s.name === 'send_reply' && reply ? `“${reply}”` : describeResult(s.name, s.result).text}{bad && <b className="exb-tag">{wrongLabel}</b>}</p>
               </div>
               {text ? <p className="exb-note">{text}</p> : <span />}
             </li>

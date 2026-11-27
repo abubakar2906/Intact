@@ -13,9 +13,11 @@ export type ExhibitFacts = {
   first: NonNullable<Experiment['exhibit']>['first'];
 };
 
-export function exhibitFacts(exp: Experiment, data: ExperimentData): ExhibitFacts | null {
-  const e = exp.exhibit;
-  if (!e) return null;
+// `pick` names a different try to read, for a story beat; the bank record of the first payment stays the same.
+export function exhibitFacts(exp: Experiment, data: ExperimentData, pick?: { model: string; condition: string; sample: number }): ExhibitFacts | null {
+  const base = exp.exhibit;
+  if (!base) return null;
+  const e = { ...base, ...(pick ?? {}) };
   const id = findRunId(data, e.model, e.condition, e.sample);
   const run = id ? getRun(id) : undefined;
   if (!run) return null;

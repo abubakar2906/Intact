@@ -8,9 +8,9 @@ import { TwoRecords } from '@/components/a/TwoRecords';
 import { Exhibit } from '@/components/b/Exhibit';
 import { exhibitFacts, storyData } from '@/lib/exhibit';
 import { ModelSplit } from '@/components/ModelSplit';
-import { RunCard } from '@/components/RunCard';
+import { Findings } from '@/components/Findings';
+import { Play } from '@/components/Play';
 import { TryGrid } from '@/components/TryGrid';
-import { ModelName } from '@/components/ModelName';
 import { ChartFrame } from '@/components/ChartFrame';
 import { ResultsTable } from '@/components/ResultsTable';
 import { ScrollStory } from '@/components/ScrollStory';
@@ -18,7 +18,7 @@ import { MODELS } from '@/content/models';
 import { CopyButton } from '@/components/CopyButton';
 import { PublicTally } from '@/components/PublicTally';
 import { PUBLIC_PROMPTS } from '@/content/public-prompts';
-import { experiments, findRunId, formatDate, getExperiment, getExperimentData, getRun, method, rankModels } from '@/lib/data';
+import { experiments, formatDate, getExperiment, getExperimentData, method, rankModels } from '@/lib/data';
 
 export function generateStaticParams() {
   return experiments.map((e) => ({ slug: e.slug }));
@@ -70,51 +70,38 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
         </div>
       </header>
 
-      <main className="home-wrap">
-        <section className="exp-why" aria-label="Why it matters">
+      <main>
+        <section className="home-wrap exp-why" aria-label="Why it matters">
           <p className="exp-why-text">{exp.whyItMatters}</p>
         </section>
 
-        <section className="exp-part">
-          <ChartFrame
-            level={2}
-            title="What each setup told the agent"
-            definition={`Every try, one square each, grouped by model. Red means it ${wrong}, grey that it got it right, an outline that it handed the case to a person.`}
-            lowerIsBetter
-          >
-            <Ladder exp={exp} data={data} />
-          </ChartFrame>
-        </section>
-
-        <section className="exp-part">
-          <ChartFrame
-            level={2}
-            title="Every model, every setup"
-            definition={`The same counts as one table, sorted by ${exp.setups[0].name.toLowerCase()}.`}
-            lowerIsBetter
-          >
+        {/* What we found: the four figures, every try, then the same counts by model. */}
+        <section className="band" aria-labelledby="found">
+          <div className="home-wrap">
+            <div className="ch-head">
+              <h2 id="found">What we found</h2>
+              <p>{exp.models.length} open models, {data.samples} tries each, in {exp.setups.length} setups. How often each setup ended with the supplier {wrong}:</p>
+            </div>
+            <Findings exp={exp} data={data} />
+            <p className="ch-sub">Every try, one square each, grouped by model. Red means it {wrong}, grey that it got it right, an outline that it handed the case to a person.</p>
+            <div className="home-ladder"><Ladder exp={exp} data={data} /></div>
+            <h3 className="ch-h3">The same counts, by model</h3>
             <div className="exp-card exp-table"><ResultsTable exp={exp} data={data} /></div>
-          </ChartFrame>
+          </div>
         </section>
 
-        {exp.beats.map((b) => {
-          const runId = b.show?.kind === 'run' ? findRunId(data, b.show.model, b.show.condition, b.show.sample) : undefined;
-          const run = runId ? getRun(runId) : undefined;
-          return (
-            // A run card needs the full width to read. A short visual sits beside its text.
-            <section key={b.heading} className={`exp-part exp-beat grid gap-10 ${run ? '' : 'lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16'}`}>
-              <div className={run ? 'max-w-2xl' : 'lg:pt-1'}>
-                <h2>{b.heading}</h2>
-                <p className="exp-body">{b.body}</p>
-                {run && (
-                  <p className="mt-6 text-[15px] text-muted">
-                    <ModelName id={run.model} size={18} className="font-medium text-ink" />
-                    <span>, {run.setupName.toLowerCase()}, try {run.sample}</span>
-                  </p>
-                )}
-              </div>
-              <div className="min-w-0">
-                {b.show?.kind === 'split' && (
+        {exp.beats.map((b, k) => {
+          const pick = b.show?.kind === 'run' ? { model: b.show.model, condition: b.show.condition, sample: b.show.sample } : undefined;
+          const beatFacts = pick ? exhibitFacts(exp, data, pick) : null;
+          const band = k === 1;
+          const body = (
+            <>
+              {b.show?.kind === 'split' && (
+                <div className="spread">
+                  <div className="ch-head">
+                    <h2>{b.heading}</h2>
+                    <p>{b.body}</p>
+                  </div>
                   <div className="exp-card exp-pad exp-split">
                     <ChartFrame
                       title={`${exp.setups.find((s) => s.id === 'B')?.name} against ${exp.setups.find((s) => s.id === 'A')?.name.toLowerCase()}`}
@@ -124,97 +111,121 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
                       <ModelSplit exp={exp} data={data} />
                     </ChartFrame>
                   </div>
-                )}
-                {b.show?.kind === 'public' && (
-                  <div className="exp-card exp-pad">
-                    <ChartFrame
-                      title="What public payment agents are told"
-                      definition={`${PUBLIC_PROMPTS.sources} examples from benchmarks and starter kits, one square each, filled where the instructions say it.`}
-                    >
-                      <PublicTally />
-                      <Link href={`${REPO}/blob/main/docs/public-prompts.md`} className="home-more">Every source, with the lines quoted</Link>
-                    </ChartFrame>
+                </div>
+              )}
+              {beatFacts && (
+                <div className="spread spread-wide">
+                  <div className="ch-head">
+                    <h2>{b.heading}</h2>
+                    <p>{b.body}</p>
                   </div>
-                )}
-                {run && <RunCard run={run} wrongLabel={exp.wrong} />}
-              </div>
-            </section>
+                  <Play>
+                    <Exhibit facts={beatFacts} setupName={exp.setups.find((s) => s.id === beatFacts.run.condition)?.name ?? beatFacts.run.setupName} wrongLabel={exp.wrong} fullReply />
+                  </Play>
+                </div>
+              )}
+              {b.show?.kind === 'public' && (
+                <div className="spread">
+                  <div className="ch-head">
+                    <h2>{b.heading}</h2>
+                    <p>{b.body}</p>
+                  </div>
+                  <div className="tally">
+                    <p className="tally-fig"><b>{PUBLIC_PROMPTS.rows[0].count}</b> of {PUBLIC_PROMPTS.sources}</p>
+                    <p className="tally-what">public payment-agent examples tell the agent to check a payment’s real status before retrying</p>
+                    <PublicTally />
+                    <Link href={`${REPO}/blob/main/docs/public-prompts.md`} className="home-more">Every source, with the lines quoted</Link>
+                  </div>
+                </div>
+              )}
+            </>
           );
+          return band
+            ? <section key={b.heading} className="band"><div className="home-wrap">{body}</div></section>
+            : <section key={b.heading} className="home-wrap chapter">{body}</section>;
         })}
 
-        <section className="exp-part" aria-labelledby="how">
-          <h2 id="how">How Intact works</h2>
-          <p className="exp-body">
-            The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.
-          </p>
+        <section className="home-wrap chapter" aria-labelledby="how">
+          <div className="ch-head">
+            <h2 id="how">How Intact grades it</h2>
+            <p>The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.</p>
+          </div>
           {story && <ScrollStory story={story} />}
         </section>
 
-        <section id="every-try" className="exp-part scroll-mt-8">
-          <ChartFrame
-            level={2}
-            title="Every try"
-            definition="Each square is one try. Open any of them to see exactly what the agent did and said."
-          >
+        {/* Every try: the grid opens any try in the drawer; then the data to check it yourself. */}
+        <section id="every-try" className="band scroll-mt-8" aria-labelledby="every">
+          <div className="home-wrap">
+            <div className="ch-head">
+              <h2 id="every">Every try</h2>
+              <p>Each square is one try. Open any of them to see exactly what the agent did and said.</p>
+            </div>
             <div className="exp-card exp-pad exp-tries">
               <TryGrid models={rankModels(exp, data)} setups={exp.setups.map((s) => ({ id: s.id, name: s.name }))} tries={data.tries} wrongLabel={exp.wrong} />
             </div>
-          </ChartFrame>
-          <div id="data" className="exp-data scroll-mt-8">
-            <p className="text-[15px] font-semibold">Get the data</p>
-            <a href={`/data/intact-${exp.slug}.csv`} download className="home-btn home-btn-quiet home-btn-sm">
-              Download CSV, one row per try
-            </a>
-            {data.folders.map((f) => (
-              // Folders end in the service the run used, e.g. "-groq", which is a shorter name than the folder.
-              <a key={f} href={`${REPO}/tree/main/results/${f}`} title={`results/${f}`} className="exp-link">
-                Full transcripts, {f.split('-').pop()} run
+            <div id="data" className="downloads scroll-mt-8">
+              <a href={`/data/intact-${exp.slug}.csv`} download className="dl">
+                <b>Download the CSV</b>
+                <span>One row per try, {data.runCount} rows</span>
               </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="exp-part grid gap-6 lg:grid-cols-2">
-          <div className="exp-card exp-pad">
-            <h2 className="exp-h-sm">What the agent got</h2>
-            <p className="exp-label mt-4">Message from {scenario.from}</p>
-            <p className="mt-2 font-code text-[15px] leading-[1.75]">{scenario.message}</p>
-            <details className="exp-details mt-6">
-              <summary>The agent’s instructions, for each setup</summary>
-              <div className="mt-4 flex flex-col gap-5">
-                {exp.setups.map((s) => (
-                  <div key={s.id}>
-                    <p className="text-[14px] font-semibold">{s.name}</p>
-                    <pre className="exp-code mt-2 whitespace-pre-wrap">{method.prompts[s.id]}</pre>
-                  </div>
-                ))}
-              </div>
-            </details>
-            <Link href="/method" className="home-more">How grading works</Link>
-          </div>
-          <div className="exp-card exp-pad">
-            <h2 className="exp-h-sm">Limits</h2>
-            <ul className="mt-4 flex flex-col gap-3">
-              {exp.limits.map((l) => (
-                <li key={l} className="text-[16px] leading-relaxed text-muted">{l}</li>
+              {data.folders.map((f) => (
+                // Folders end in the service the run used, e.g. "-groq", which is a shorter name than the folder.
+                <a key={f} href={`${REPO}/tree/main/results/${f}`} className="dl">
+                  <b>Full transcripts, {f.split('-').pop()} run</b>
+                  <span>results/{f}</span>
+                </a>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 
-        <section className="exp-part exp-cite" aria-labelledby="cite">
-          <div className="flex flex-wrap items-baseline justify-between gap-4">
-            <h2 id="cite" className="exp-h-sm">Cite this</h2>
-            <CopyButton text={citation} targetId="cite-text" label="Copy citation" />
+        {/* The setup, and what this run can and cannot tell you. */}
+        <section className="home-wrap chapter" aria-labelledby="setup">
+          <div className="ch-head">
+            <h2 id="setup">The setup, and its limits</h2>
+            <p>What the agent was given, word for word, and what this run can and cannot tell you.</p>
           </div>
-          <p id="cite-text" className="mt-4 max-w-3xl text-[16px] leading-relaxed text-muted">{citation}</p>
-          <div className="exp-card mt-6 overflow-hidden">
-            <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
-              <span className="exp-label">BibTeX</span>
-              <CopyButton text={bibtex} targetId="cite-bibtex" label="Copy BibTeX" />
+          <div className="setup">
+            <div>
+              <h3 className="ch-h3">What the agent got</h3>
+              <div className="st-msg setup-msg">
+                <p className="st-label">Message from {scenario.from}</p>
+                <p>“{scenario.message}”</p>
+              </div>
+              <details className="exp-details mt-6">
+                <summary>The agent’s instructions, for each setup</summary>
+                <div className="mt-4 flex flex-col gap-5">
+                  {exp.setups.map((s) => (
+                    <div key={s.id}>
+                      <p className="text-[14px] font-semibold">{s.name}</p>
+                      <pre className="exp-code mt-2 whitespace-pre-wrap">{method.prompts[s.id]}</pre>
+                    </div>
+                  ))}
+                </div>
+              </details>
+              <Link href="/method" className="home-more">How grading works</Link>
             </div>
-            <pre id="cite-bibtex" className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-ink">{bibtex}</pre>
+            <div>
+              <h3 className="ch-h3">Limits</h3>
+              <ol className="limits">
+                {exp.limits.map((l) => <li key={l}>{l}</li>)}
+              </ol>
+            </div>
           </div>
+          <section className="exp-cite" aria-labelledby="cite">
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <h2 id="cite" className="exp-h-sm">Cite this</h2>
+              <CopyButton text={citation} targetId="cite-text" label="Copy citation" />
+            </div>
+            <p id="cite-text" className="mt-4 max-w-3xl text-[16px] leading-relaxed text-muted">{citation}</p>
+            <div className="exp-card mt-6 overflow-hidden">
+              <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
+                <span className="exp-label">BibTeX</span>
+                <CopyButton text={bibtex} targetId="cite-bibtex" label="Copy BibTeX" />
+              </div>
+              <pre id="cite-bibtex" className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-ink">{bibtex}</pre>
+            </div>
+          </section>
         </section>
       </main>
       <div className="exp-foot"><Footer wide /></div>
