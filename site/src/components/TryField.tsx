@@ -206,7 +206,7 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
 
   // Keep a tag inside the box. Its width is a guess from its length, close enough to stop clipping.
   const inside = ([x, y]: [number, number], text: string, logo: boolean) => {
-    const half = (text.length * 6.6 + (logo ? 62 : 40)) / 2;
+    const half = (text.length * 6.6 + (logo ? 48 : 40)) / 2;
     return { left: Math.min(Math.max(x, half + 4), (size?.w ?? 0) - half - 4), top: y };
   };
 
@@ -227,7 +227,7 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
         return (
           <div key={t.text} className={`try-tag try-tag-${t.tone}${k ? ' try-tag-extra' : ''}`} aria-hidden
             style={{ ...inside(P(t.setup * plateStep + m + 0.5, j, top + 44), t.text, !!t.logo), '--in': `${TAGS_AT + k * TAG_STAGGER}ms` } as React.CSSProperties}>
-            <i />{t.logo}{t.text}
+            {t.logo ?? <i />}{t.text}
           </div>
         );
       })}

@@ -4,11 +4,13 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { TryField, type FieldTag } from '@/components/TryField';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Updates } from '@/components/Updates';
+import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
 import { experiments, getExperimentData, method, rankModels } from '@/lib/data';
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
 const X = 'https://x.com/kairo_v0';
+const HEADLINE_MODEL = 'qwen/qwen3.8-27b';
 const SHOT_ALT = 'The Intact platform: payments checked this week, the flow of money through the guard, the latest decisions, and a payment waiting for approval.';
 
 export default function Home() {
@@ -28,8 +30,12 @@ export default function Home() {
   const worst = models.length - 1;
   const first = latest.setups[0].id;
   const index = (id: string) => latest.setups.findIndex((s) => s.id === id);
+  // The headline tag names one model, picked by its id rather than its rank, so it stays put if the ranking moves.
+  // If a later experiment leaves that model out, the tag falls back to the worst one.
+  const headline = models.includes(HEADLINE_MODEL) ? models.indexOf(HEADLINE_MODEL) : worst;
+  const hid = models[headline];
   const tags: FieldTag[] = [
-    { setup: 0, model: worst, tone: 'wrong', text: `${MODELS[models[worst]].name} ${latest.wrong.toLowerCase()}, ${data.counts[models[worst]][first].wrong} of ${data.counts[models[worst]][first].n}` },
+    { setup: 0, model: headline, tone: 'wrong', logo: <ModelLogo id={hid} size={16} />, text: `${MODELS[hid].name} ${latest.wrong.toLowerCase()}, ${data.counts[hid][first].wrong} of ${data.counts[hid][first].n}` },
   ];
   if (index('C') >= 0) tags.push({ setup: index('C'), model: worst, tone: 'plain', text: '“Check with the bank first”' });
   if (index('D') >= 0) tags.push({ setup: index('D'), tone: 'kept', text: 'The lock: no repeats' });
