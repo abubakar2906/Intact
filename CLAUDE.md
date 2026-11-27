@@ -59,7 +59,7 @@ cd site && npm run lint && npx tsc --noEmit -p .
 
 ## The site
 
-Live at https://intact-bench.vercel.app. The home, experiment and method pages share one style (27 November 2026). The results list (`/experiments`) still has the older look.
+Live at https://intact-bench.vercel.app. Every page shares one style (27 November 2026): home, results list, experiment and method.
 
 **Home page (`site/src/app/page.tsx`).** Chosen on 27 November from three mock-ups: a research note (A) on a sidebar grid (B). Text is the centrepiece; taste goes into the figures and their motion.
 - **Grid:** 80px margins, 12 columns. Columns 1 to 3 hold "Research lab", the experiment's facts, section numbers and figure numbers; the text reads in columns 4 to 9; figures run across all 12.
@@ -83,7 +83,7 @@ Live at https://intact-bench.vercel.app. The home, experiment and method pages s
 
 ## Next jobs on the site
 
-As of 27 November, after the chapters redesign:
+As of 27 November:
 
 1. **All pages share the lab style.** Home sections: opening, 01 Figure 1, 02 one sentence, 03 what we build from it (public wording, dashboard picture), 04 research (`ResearchList`).
 2. **Platform section:** public wording only, from `PLATFORM` in `content/how-it-works.ts`.
