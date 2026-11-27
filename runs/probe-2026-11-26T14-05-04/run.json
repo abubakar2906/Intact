@@ -1,0 +1,16 @@
+{
+  "models": [
+    "gemini-4-hydrogen",
+    "gemini-3.8-flash"
+  ],
+  "scenarios": [
+    "stale-failed"
+  ],
+  "samples": 10,
+  "conditions": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ]
+}
