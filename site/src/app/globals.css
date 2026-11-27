@@ -1036,3 +1036,80 @@ h1, h2, h3 {
   .only-narrow .tt-name, .only-narrow .os-name { font-size: 14px; }
   .only-narrow .tt-count { font-size: 14px; }
 }
+/* Step charts. */
+.sc-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sc-base { stroke: var(--ink); stroke-width: 1; }
+.sc-col { stroke: var(--hair); stroke-width: 1; }
+.sc-area { fill: var(--red); opacity: 0.08; }
+.sc-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: miter; }
+.sc-num { font: 300 104px var(--font-geist), sans-serif; letter-spacing: -0.05em; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.sc-num.is-wrong { fill: var(--red); }
+.sc-names { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px; }
+.sc-names li { padding: 0 16px; display: grid; gap: 4px; }
+.sc-names li + li { border-left: 1px solid var(--hair); }
+.sc-names b { font-weight: 500; font-size: 16px; }
+.sc-names span { font: 13px var(--font-geist-mono), monospace; color: var(--ink-3); }
+.gp-multiples { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; }
+.sc:not(.sc-big) .sc-num { font: 400 22px var(--font-geist-mono), monospace; letter-spacing: 0; }
+.sc:not(.sc-big) .sc-line { stroke-width: 1.5; }
+.sc-title { margin-bottom: 8px; font-size: 15px; font-weight: 500; padding-top: 12px; border-top: 1px solid var(--ink); }
+/* The step line draws once, left to right; the fill and numerals follow it. */
+[data-js] .sc:not([data-seen]) .sc-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+[data-js] .sc:not([data-seen]) :is(.sc-area, .sc-step) { opacity: 0; }
+.sc[data-seen] .sc-line { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 1100ms cubic-bezier(0.65, 0, 0.35, 1); }
+.sc[data-seen] .sc-area { transition: opacity 500ms ease-out 600ms; }
+.sc[data-seen] .sc-step { transition: opacity 300ms ease-out calc(120ms + var(--i) * 260ms); }
+
+.sc-names b { font-family: var(--font-geist), sans-serif; }
+
+/* ===== Combined (mock-up): A's type and figures on B's sidebar grid ===== */
+/* 80px margins and 12 columns. Facts, section numbers and figure numbers in columns 1 to 3; the text reads in
+   columns 4 to 9 (about 620px); figures run across all 12. Type and colour are A's: Geist at 500 for headings,
+   Newsreader for reading text, Geist Mono for facts and data. */
+.nx-top { display: flex; align-items: center; justify-content: space-between; height: 72px; margin: 0 80px; border-bottom: 1px solid var(--hair); font-size: 15px; }
+.nx-top nav { display: flex; align-items: center; gap: 32px; color: var(--ink-3); }
+.nx-top nav a { transition: color 150ms ease-out; }
+.nx-top nav a:hover { color: var(--ink); }
+.nx-row, .nx-cap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; }
+.nx-row { margin: 0 80px; }
+.nx-side { grid-column: 1 / 4; font: 13px/1.5 var(--font-geist-mono), monospace; color: var(--ink-3); }
+.nx-main { grid-column: 4 / 10; }
+.nx-hero { padding-top: 144px; }
+.nx-hero .nx-side { padding-top: 16px; }
+.nx h1 { font-size: 52px; line-height: 1.08; letter-spacing: -0.03em; }
+.nx-intro { padding-top: 48px; }
+.nx-facts { display: grid; gap: 10px; align-content: start; padding-top: 6px; }
+.nx-facts div { display: grid; grid-template-columns: 96px 1fr; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+.nx-facts dd { color: var(--ink); }
+.nx-prose > p { margin-top: 20px; font-family: var(--font-serif), Georgia, serif; font-size: 19px; line-height: 1.62; color: var(--ink-2); font-variation-settings: 'opsz' 16; }
+.nx-prose > p:first-child { margin-top: 0; }
+.nx-prose > p.lede { color: var(--ink); }
+.nx h2 { margin: 0 0 4px; font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; }
+.nx-section { padding-top: 152px; }
+.nx-section .nx-side { padding-top: 10px; }
+.nx-fig { margin: 88px 80px 0; }
+.nx-cap { margin-top: 20px; font-size: 13px; line-height: 1.55; color: var(--ink-3); }
+.nx-cap .nx-side { color: var(--ink); }
+.nx-end { padding: 152px 0 120px; }
+.nx-small { font-size: 13px; color: var(--ink-3); }
+.nx footer .home-wrap { max-width: none; margin: 0 80px; padding: 0; }
+
+@media (max-width: 900px) {
+  .nx-top, .nx-row, .nx-fig { margin-left: 20px; margin-right: 20px; }
+  .nx-top nav { gap: 16px; }
+  .nx-top nav a:nth-child(2), .nx-top nav a:nth-child(3) { display: none; }
+  .nx-row, .nx-cap { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
+  .nx-side, .nx-main { grid-column: 1 / -1; }
+  .nx-hero { padding-top: 64px; }
+  .nx-hero .nx-side { padding-top: 0; }
+  .nx h1 { font-size: 34px; }
+  .nx h2 { font-size: 24px; }
+  .nx-prose > p { font-size: 18px; }
+  .nx-section { padding-top: 104px; }
+  .nx-fig { margin-top: 56px; }
+  .nx-cap { row-gap: 2px; }
+  .sc-num { font-size: 150px; }
+  .sc-names { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 16px; }
+  .sc-names li:nth-child(3) { border-left: 0; }
+  .nx footer .home-wrap { margin: 0 20px; }
+}

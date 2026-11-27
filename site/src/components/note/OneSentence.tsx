@@ -10,7 +10,8 @@ export type SentenceRow = { name: string; logo: string; ink: boolean; before: nu
 
 // Wide: names on the left of each row. Narrow (phones): each name sits above its row.
 const GEOM = {
-  wide: { W: 1040, LABEL: 220, PAD_L: 0, PAD_R: 40, ROW: 56, NAME_DY: 0 },
+  // LABEL puts the 0 axis where the page's text column starts (column 4 of 12).
+  wide: { W: 1040, LABEL: 263, PAD_L: 0, PAD_R: 40, ROW: 56, NAME_DY: 0 },
   narrow: { W: 360, LABEL: 0, PAD_L: 12, PAD_R: 16, ROW: 76, NAME_DY: -26 },
 };
 
