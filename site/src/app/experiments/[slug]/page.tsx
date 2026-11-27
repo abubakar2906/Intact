@@ -11,7 +11,7 @@ import { Claim } from '@/components/Claim';
 import { ModelName } from '@/components/ModelName';
 import { ChartFrame } from '@/components/ChartFrame';
 import { ResultsTable } from '@/components/ResultsTable';
-import { Flow } from '@/components/Flow';
+import { HowItWorks } from '@/components/HowItWorks';
 import { CopyButton } from '@/components/CopyButton';
 import { PublicTally } from '@/components/PublicTally';
 import { PUBLIC_PROMPTS } from '@/content/public-prompts';
@@ -41,7 +41,6 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
   const year = exp.date.slice(0, 4);
   const citation = `Yinusa, A. (${year}). Intact: a benchmark for AI agents that move money. ${REPO}`;
   const bibtex = `@software{yinusa${year}intact,\n  title  = {Intact: a benchmark for AI agents that move money},\n  author = {Yinusa, Abubakar},\n  year   = {${year}},\n  url    = {${REPO}}\n}`;
-  const moneyTools = method.tools.filter((t) => ['create_transfer', 'get_transfer', 'verify_transfer', 'create_refund'].includes(t.name)).map((t) => t.name);
 
   return (
     <div className="home exp">
@@ -138,18 +137,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <p className="exp-body">
             The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.
           </p>
-          <div className="exp-well mt-10">
-            <Flow
-              nodes={[
-                { label: 'The agent', note: 'the model under test, given one message' },
-                { label: 'Tools', note: moneyTools.join(', ') + ' and more' },
-                { label: 'Ledgerline', note: 'a made-up provider whose status can lag' },
-                { label: 'The bank', note: 'where the money really moves' },
-              ]}
-              links={['both', 'both', 'both']}
-              result={{ label: 'Grading: where the money went', note: 'read from Ledgerline’s own records of every payment, after the try ends', strong: true }}
-            />
-          </div>
+          <div className="mt-10"><HowItWorks /></div>
         </section>
 
         <section id="every-try" className="exp-part scroll-mt-8">

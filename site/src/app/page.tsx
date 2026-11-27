@@ -3,6 +3,8 @@ import { Footer } from '@/components/Footer';
 import { ResultsTable } from '@/components/ResultsTable';
 import { TryField, type FieldTag } from '@/components/TryField';
 import { HomeNav } from '@/components/HomeNav';
+import { HowItWorks } from '@/components/HowItWorks';
+import { PLATFORM } from '@/content/how-it-works';
 import { Updates } from '@/components/Updates';
 import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
@@ -101,6 +103,11 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="home-wrap home-part" aria-labelledby="how-h">
+          <h2 id="how-h">How the benchmark works</h2>
+          <HowItWorks />
+        </section>
+
         <section className="home-wrap home-part" aria-labelledby="results">
           <p className="home-kicker">Experiment {n}, {latest.eyebrow.toLowerCase()}</p>
           <h2 id="results">A payout shows “failed”. The bank already paid. Do agents pay again?</h2>
@@ -108,6 +115,17 @@ export default function Home() {
             <ResultsTable exp={latest} data={data} />
           </div>
           <Link href={`/experiments/${latest.slug}`} className="home-more">Open every try</Link>
+        </section>
+
+        <section className="home-wrap home-part" aria-labelledby="platform-h">
+          <h2 id="platform-h">{PLATFORM.heading}</h2>
+          <p className="home-sub">{PLATFORM.body}</p>
+          <ul className="home-rules">
+            {PLATFORM.rules.map((r) => (
+              <li key={r.title}><b>{r.title}</b><span>{r.body}</span></li>
+            ))}
+          </ul>
+          <p className="home-note">In the benchmark, a lock in the transfer tool stopped every repeat payment: {data.totals.D ? `${data.totals.D.wrong} of ${data.totals.D.n}` : 'none got through'}. The guard is that lock, made stronger. In private testing now.</p>
         </section>
 
         <section className="home-wrap home-part home-updates" aria-labelledby="updates">

@@ -13,20 +13,27 @@ const PLATE_GAP = 2.2;
 const RAISED = 26;
 const FLAT = 5;
 
-// The one moment of motion, the first time the field scrolls into view. Times in ms.
-// The plates settle in, then the paid-twice blocks rise, staggered by plate, then model, then try.
-// Each plate's count goes up as its blocks rise. Then the tags fade in. All done in about 1.35 seconds.
-const PLATE_STAGGER = 70;
-const PLATE_DUR = 380;
-const PLATE_DROP = 14; // in block-height units: how far above its place a plate starts
-const RISE_AT = 320;
-const BY_PLATE = 130;
-const BY_MODEL = 40;
-const BY_TRY = 12;
-const RISE_DUR = 380;
-const TAGS_AT = 1000;
-const TAG_STAGGER = 50;
-const TAG_DUR = 260; // matches the tag animation in globals.css
+// The one moment of motion, the first time the field scrolls into view (choreographed with the choreograph skill).
+// Lead: each model's ridge of paid-twice blocks rises as one object, plate by plate, model by model.
+// The gaps shrink as it goes, so it reads as a wave, not a queue. Static: the plates and flat blocks are
+// already there. Support: each plate's count ticks as a ridge lands. Decoration: each tag fades in, in place,
+// as the ridge it points at lands. Under a second in all. With reduced motion everything shows at once.
+const PLATE_AT = [0, 150, 260, 340]; // when each plate's first ridge starts, in ms
+const MODEL_AT = [0, 70, 125, 170, 205]; // within a plate, when each model's ridge starts
+const RISE_DUR = 560;
+const LAND = 0.85; // a ridge counts as landed here, when the eye reads it as up
+const TAG_DUR = 240; // matches the tag animation in globals.css
+const step = (list: number[], i: number) => list[Math.min(i, list.length - 1)] + Math.max(0, i - list.length + 1) * 30;
+const ridgeStart = (k: number, m: number) => step(PLATE_AT, k) + step(MODEL_AT, m);
+// A tag fades in as the ridge it points at lands. A tag on a plate with no ridge comes in at that plate's turn.
+const tagAt = (t: FieldTag, setups: FieldSetup[]) => {
+  const k = t.setup;
+  const m = t.model ?? setups[k].wrong.length - 1;
+  const ridges = setups[k].wrong.map((w, i) => (w > 0 ? i : -1)).filter((i) => i >= 0);
+  if (t.model !== undefined && setups[k].wrong[m] > 0) return Math.round(ridgeStart(k, m) + RISE_DUR * LAND);
+  if (ridges.length) return Math.round(ridgeStart(k, ridges[ridges.length - 1]) + RISE_DUR * LAND);
+  return step(PLATE_AT, k) + 300;
+};
 
 // A strong ease-out: quick to start, long gentle landing, no bounce.
 const out = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4);
@@ -52,8 +59,6 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
   // When the motion started, or Infinity once it is over (or skipped). null until the field is seen.
   const started = useRef<number | null>(null);
   const draw = useRef<(now: number) => boolean>(() => false);
-  // When the last tag has finished fading in, in ms from the start.
-  const lastTag = useRef(TAGS_AT + (tags.length - 1) * TAG_STAGGER + TAG_DUR);
 
   const models = setups[0].tries.length;
   const rows = Math.max(...setups.flatMap((s) => s.tries));
@@ -90,15 +95,16 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
       started.current = performance.now();
       setStage('run');
       // The canvas finishes first. The stage stays 'run' until the last tag has faded in too.
+      const lastTag = Math.max(0, ...tags.map((t) => tagAt(t, setups) + TAG_DUR));
       const tick = (now: number) => {
         if (draw.current(now)) frame = requestAnimationFrame(tick);
-        else timer = window.setTimeout(() => setStage('done'), Math.max(0, (started.current ?? 0) + lastTag.current - now));
+        else timer = window.setTimeout(() => setStage('done'), Math.max(0, (started.current ?? 0) + lastTag - now));
       };
       frame = requestAnimationFrame(tick);
     }, { threshold: 0.35 });
     io.observe(el);
     return () => { ro.disconnect(); mo.disconnect(); io.disconnect(); cancelAnimationFrame(frame); clearTimeout(timer); };
-  }, []);
+  }, [setups, tags]);
 
   // Size the blocks to the space we have, so the last plate is never cut off.
   const iMin = -0.35, jMin = -0.35;
@@ -123,8 +129,8 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
       if (!c) return false;
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
       c.clearRect(0, 0, size.w, size.h);
-      if (started.current === null) return false;
-      const t = now - started.current;
+      // Before the field is seen, the plates and flat blocks are already drawn and nothing has risen.
+      const t = started.current === null ? -Infinity : now - started.current;
       const colours = { flat: read(cv, 'flat'), wrong: read(cv, 'wrong'), plate: read(cv, 'plate') };
       const glow = getComputedStyle(cv).getPropertyValue('--try-glow').trim();
 
@@ -148,57 +154,48 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
         c.stroke();
       };
 
-      // How far each plate has settled (0 to 1), and how far each raised block has risen.
-      const settle = setups.map((_, k) => out((t - k * PLATE_STAGGER) / PLATE_DUR));
-      const cubes: { k: number; i: number; j: number; up: number }[] = [];
+      // How far each raised block has risen. A model's ridge rises as one object.
+      const cubes: { i: number; j: number; up: number }[] = [];
       const risen = setups.map(() => 0);
-      let busy = settle.some((s) => s < 1);
+      let busy = false;
       setups.forEach((s, k) => {
         s.tries.forEach((n, m) => {
           // Mistakes sit at the back of each column, so the raised blocks never hide the rest.
           for (let j = 0; j < n; j++) {
             let up = 0;
             if (j < s.wrong[m]) {
-              const p = (t - RISE_AT - k * BY_PLATE - m * BY_MODEL - j * BY_TRY) / RISE_DUR;
+              const p = (t - ridgeStart(k, m)) / RISE_DUR;
               up = out(p);
               if (p < 1) busy = true;
-              if (p >= 0.5) risen[k]++;
+              if (p >= LAND) risen[k]++;
             }
-            cubes.push({ k, i: k * plateStep + m, j, up });
+            cubes.push({ i: k * plateStep + m, j, up });
           }
         });
       });
 
-      // The counts under each plate follow the blocks, one at a time.
+      // The counts under each plate tick up as each ridge lands.
       risen.forEach((n, k) => {
         for (const el of [counts.current[k], legend.current[k]]) if (el && el.textContent !== String(n)) el.textContent = String(n);
       });
 
-      const lift = (k: number) => (1 - settle[k]) * PLATE_DROP;
-      setups.forEach((_, k) => {
-        if (settle[k] <= 0) return;
-        c.globalAlpha = settle[k];
-        block(k * plateStep - 0.35, -0.35, k * plateStep + models + 0.35, rows + 0.35, -8 + lift(k), lift(k), colours.plate);
-      });
+      setups.forEach((_, k) => block(k * plateStep - 0.35, -0.35, k * plateStep + models + 0.35, rows + 0.35, -8, 0, colours.plate));
       cubes.sort((a, b) => a.i + a.j - (b.i + b.j));
-      for (const { k, i, j, up } of cubes) {
-        if (settle[k] <= 0) continue;
-        c.globalAlpha = settle[k];
+      for (const { i, j, up } of cubes) {
         const top = up > 0 ? FLAT + (RAISED - FLAT) * up : FLAT;
         // A rising block turns red, and starts to glow, as soon as it leaves the plate.
         const red = up > 0.15;
         if (red) { c.save(); c.shadowColor = glow; c.shadowBlur = 14 * up; }
-        block(i + GAP, j + GAP, i + 1 - GAP, j + 1 - GAP, lift(k), top + lift(k), red ? colours.wrong : colours.flat);
+        block(i + GAP, j + GAP, i + 1 - GAP, j + 1 - GAP, 0, top, red ? colours.wrong : colours.flat);
         if (red) c.restore();
       }
-      c.globalAlpha = 1;
       return busy;
     };
   });
 
   // Redraw on every render (size or theme changed). While the motion runs, the loop draws instead.
   useEffect(() => {
-    if (stage !== 'run') draw.current(Infinity);
+    if (stage !== 'run') draw.current(stage === 'idle' ? 0 : Infinity);
   });
 
   const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
@@ -215,7 +212,7 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
     <div ref={box} className="try-field" role="img" aria-label={label}>
       <canvas ref={canvas} aria-hidden />
       {size && setups.map((s, k) => (
-        <div key={s.name} className="try-plate" aria-hidden style={{ ...at(P(k * plateStep + models + 0.8, rows + 0.6, -14)), '--in': `${k * PLATE_STAGGER}ms` } as React.CSSProperties}>
+        <div key={s.name} className="try-plate" aria-hidden style={{ ...at(P(k * plateStep + models + 0.8, rows + 0.6, -14)), '--in': '0ms' } as React.CSSProperties}>
           {s.name}<b><span ref={(el) => { counts.current[k] = el; }}>{sum(s.wrong)}</span> of {sum(s.tries)}</b>
         </div>
       ))}
@@ -226,14 +223,14 @@ export function TryField({ setups, tags, label }: { setups: FieldSetup[]; tags: 
         const j = t.model !== undefined ? 0.5 : rows * 0.6;
         return (
           <div key={t.text} className={`try-tag try-tag-${t.tone}${k ? ' try-tag-extra' : ''}`} aria-hidden
-            style={{ ...inside(P(t.setup * plateStep + m + 0.5, j, top + 44), t.text, !!t.logo), '--in': `${TAGS_AT + k * TAG_STAGGER}ms` } as React.CSSProperties}>
+            style={{ ...inside(P(t.setup * plateStep + m + 0.5, j, top + 44), t.text, !!t.logo), '--in': `${tagAt(t, setups)}ms` } as React.CSSProperties}>
             {t.logo ?? <i />}{t.text}
           </div>
         );
       })}
     </div>
     {/* On a phone the plates sit too close for their labels, so they move into a list below. */}
-    <ul className="try-legend" aria-hidden style={{ '--in': `${RISE_AT}ms` } as React.CSSProperties}>
+    <ul className="try-legend" aria-hidden>
       {setups.map((s, k) => <li key={s.name}>{s.name}<b><span ref={(el) => { legend.current[k] = el; }}>{sum(s.wrong)}</span> of {sum(s.tries)}</b></li>)}
     </ul>
     </div>

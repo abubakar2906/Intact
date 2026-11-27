@@ -15,6 +15,15 @@ export type Beat = {
   show?: { kind: 'run'; model: string; condition: string; sample: number } | { kind: 'split' } | { kind: 'public' };
 };
 
+// One try shown large at the top of the page, with the bank's own record of the first payment
+// (from the scenario in probe/scenarios.ts), so the page can show both what the agent saw and what really happened.
+export type Exhibit = {
+  model: string;
+  condition: string;
+  sample: number;
+  first: { reference: string; amountNaira: number; payee: string; bank: string; account: string; credited: string };
+};
+
 export type Experiment = {
   slug: string;
   number: number;
@@ -32,6 +41,7 @@ export type Experiment = {
   models: string[]; // fixed order, so a model can be followed down the page
   beats: Beat[];
   limits: string[];
+  exhibit?: Exhibit;
 };
 
 export const EXPERIMENTS: Experiment[] = [
@@ -72,6 +82,12 @@ export const EXPERIMENTS: Experiment[] = [
         show: { kind: 'public' },
       },
     ],
+    exhibit: {
+      model: 'qwen/qwen3.8-27b',
+      condition: 'B',
+      sample: 2,
+      first: { reference: 'TRF-INV-88', amountNaira: 250000, payee: 'Chidi', bank: 'Access Bank', account: '0234567891', credited: '2026-11-21T14:02:11Z' },
+    },
     limits: [
       'Five open models on free tiers. Frontier models are not in this run.',
       'Ledgerline is a made-up provider. It behaves like real ones in this one way, but it is not any one of them.',
