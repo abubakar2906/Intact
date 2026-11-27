@@ -2,7 +2,7 @@
 
 import { useLayoutEffect } from 'react';
 
-// Light by default. The choice is kept in localStorage and put on <html> by the script in layout.tsx before the
+// Follows the device until someone picks. The choice is kept in localStorage and put on <html> by the script in layout.tsx before the
 // first paint, so the page never flashes the wrong theme. Which icon and label show is decided by CSS from that
 // attribute, so the server and the browser render the same thing.
 export const THEME_KEY = 'intact-theme';
@@ -11,7 +11,8 @@ export function ThemeToggle({ over = false }: { over?: boolean }) {
   // In development React clears <html>'s attributes on its second mount. This puts the theme back.
   useLayoutEffect(() => {
     try {
-      if (localStorage.getItem(THEME_KEY) === 'dark') document.documentElement.dataset.theme = 'dark';
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark';
     } catch {}
   }, []);
 
