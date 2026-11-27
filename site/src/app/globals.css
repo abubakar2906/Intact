@@ -658,10 +658,8 @@ h1, h2, h3 {
 /* A chapter on the page, and a chapter on a full-width band in the hero's sky, so its quality carries down the page.
    The band fades in and out of the page at both edges, so there is no hard seam. */
 .chapter { padding-top: 168px; }
-.band { margin-top: 168px; padding: 136px 0; background:
-  radial-gradient(50% 60% at 78% 30%, var(--home-glow-a), transparent 70%),
-  radial-gradient(40% 50% at 10% 80%, var(--home-glow-b), transparent 70%),
-  linear-gradient(180deg, var(--home-page), var(--home-sky) 18%, var(--home-sky) 82%, var(--home-page)); }
+/* A band is spacing only: no background of its own, so the page reads as one surface with no seams. */
+.band { padding-top: 168px; }
 .ch-head { max-width: 760px; margin-bottom: 56px; }
 .home .ch-head h2 { font-size: 56px; line-height: 1.02; letter-spacing: -0.035em; }
 .ch-head p { margin-top: 20px; font-size: 19px; line-height: 1.55; color: var(--home-text-2); max-width: 620px; }
@@ -697,7 +695,7 @@ h1, h2, h3 {
 @media (max-width: 900px) {
   .home-hero-grid { min-height: 0; }
   .chapter { padding-top: 112px; }
-  .band { margin-top: 112px; padding: 88px 0; }
+  .band { padding-top: 112px; }
   .home .ch-head h2 { font-size: 36px; }
   .ch-head { margin-bottom: 40px; }
   .ch-head p { font-size: 17px; }
@@ -786,3 +784,54 @@ h1, h2, h3 {
 .counts { margin-top: 48px; }
 .counts .exp-table { margin-top: 16px; }
 @media (max-width: 900px) { .legend { margin-top: 48px; } }
+
+/* ===== Experiment results: how the count changes from setup to setup ===== */
+.sl { margin-top: 8px; }
+.sl-lead { position: relative; padding-top: 40px; }
+.sl-heads { position: absolute; inset: 0 0 auto 0; height: 32px; }
+.sl-heads p { position: absolute; top: 0; translate: -50% 0; white-space: nowrap; font-size: 15px; font-weight: 500; color: var(--home-text-2); transition: color 150ms ease-out; }
+.sl-heads p:first-child { translate: -15% 0; }
+.sl-heads p:last-child { translate: -85% 0; }
+.sl-heads p.is-on { color: var(--home-text); }
+.sl-short { display: none; }
+.sl-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sl-grid { stroke: var(--home-edge); stroke-width: 1; }
+.sl-tick { font: 11px var(--font-mono); fill: var(--home-text-3); }
+.sl-big .sl-tick { font-size: 12px; }
+.sl-cross { stroke: var(--home-text-3); stroke-width: 1; opacity: 0.5; }
+.sl-area { fill: var(--try-wrong); opacity: 0.1; }
+.sl-line { fill: none; stroke: var(--home-text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.sl-pt circle { fill: var(--home-text); stroke: var(--home-page); stroke-width: 2; }
+.sl-pt.is-wrong circle { fill: var(--try-wrong); }
+.sl-pt.is-on circle { stroke-width: 3; }
+.sl-val { font: 600 13px var(--font-soft), var(--font-sans); fill: var(--home-text); }
+.sl-big .sl-val { font-size: 22px; letter-spacing: -0.02em; }
+.sl-x { font: 12px var(--font-mono); fill: var(--home-text-3); }
+.sl-small .sl-tick { font-size: 12px; }
+.sl-x.is-on { fill: var(--home-text); }
+.sl-small { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; margin-top: 64px; }
+.sl-small li { padding-top: 16px; border-top: 1px solid var(--home-edge); }
+.sl-name { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+/* The lines draw once, left to right; points arrive as the line reaches them. */
+[data-js] .sl-svg:not([data-drawn]) .sl-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+[data-js] .sl-svg:not([data-drawn]) :is(.sl-area, .sl-pt) { opacity: 0; }
+.sl-svg[data-drawn] .sl-line { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 900ms cubic-bezier(0.65, 0, 0.35, 1); }
+.sl-svg[data-drawn] .sl-area { transition: opacity 500ms ease-out 500ms; }
+.sl-svg[data-drawn] .sl-pt { transition: opacity 200ms ease-out calc(var(--i) * 260ms + 60ms); }
+@media (max-width: 900px) {
+  .sl-long { display: none; }
+  .sl-short { display: inline; }
+  .sl-heads p { font-size: 13px; }
+  .sl-small { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; margin-top: 40px; }
+  /* The charts shrink to the screen, and their text and marks with them. These sizes are in chart units,
+     set so they come out at a readable size on a phone. */
+  .sl-big .sl-val { font-size: 44px; }
+  .sl-big .sl-tick { font-size: 30px; }
+  .sl-big .sl-line { stroke-width: 5; }
+  .sl-big .sl-pt circle { r: 13; stroke-width: 5; }
+  .sl-small .sl-tick, .sl-small .sl-x { font-size: 16px; }
+  .sl-small .sl-x { display: none; }
+  .sl-small .sl-val { font-size: 19px; }
+  .sl-small .sl-line { stroke-width: 3; }
+  .sl-small .sl-pt circle { r: 6; stroke-width: 3; }
+}

@@ -3,12 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { HomeNav } from '@/components/HomeNav';
 import { Footer } from '@/components/Footer';
-import { Ladder } from '@/components/a/Ladder';
 import { TwoRecords } from '@/components/a/TwoRecords';
 import { Exhibit } from '@/components/b/Exhibit';
 import { exhibitFacts, storyData } from '@/lib/exhibit';
 import { ModelSplit } from '@/components/ModelSplit';
-import { Findings } from '@/components/Findings';
+import { SetupLines } from '@/components/SetupLines';
+import { ModelLogo } from '@/components/ModelName';
 import { Play } from '@/components/Play';
 import { TryGrid } from '@/components/TryGrid';
 import { ChartFrame } from '@/components/ChartFrame';
@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: PageProps<'/experiments/[slug
 }
 
 const REPO = 'https://github.com/abubakar2906/Intact';
+// Short setup names for the small charts, where the full ones do not fit.
+const SHORT: Record<string, string> = { B: 'No hint', A: 'Docs', C: 'Sentence', D: 'Lock' };
 
 // The experiment page, in the home page's look (.home and .exp in globals.css).
 // The charts are the same components as before; .exp points their colours at the home tokens.
@@ -76,15 +78,13 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
             <div className="ch-head">
               <h2 id="found">How often agents {wrong}</h2>
             </div>
-            <Findings exp={exp} data={data} />
-            <ul className="legend" aria-label="Key">
-              <li><i className="sq-wrong" />{exp.wrong}</li>
-              <li><i className="sq-right" />Got it right</li>
-              <li><i className="sq-escalated" />Handed to a person</li>
-            </ul>
-            <div className="home-ladder"><Ladder exp={exp} data={data} /></div>
+            <SetupLines
+              wrongLabel={exp.wrong}
+              setups={exp.setups.map((s) => ({ id: s.id, name: s.name, short: SHORT[s.id] ?? s.name, total: data.totals[s.id] }))}
+              models={rankModels(exp, data).reverse().map((m) => ({ id: m, name: MODELS[m].name, logo: <ModelLogo id={m} size={16} />, counts: exp.setups.map((s) => data.counts[m][s.id]) }))}
+            />
             <details className="exp-details counts">
-              <summary>Counts by model</summary>
+              <summary>The counts as a table</summary>
               <div className="exp-card exp-table"><ResultsTable exp={exp} data={data} /></div>
             </details>
           </div>
