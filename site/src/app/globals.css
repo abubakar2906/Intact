@@ -943,3 +943,96 @@ h1, h2, h3 {
   .lab-stamp-line { grid-template-columns: 44px 1fr; height: auto; padding: 12px 0; row-gap: 8px; }
   .lab-stamp { grid-column: 2; justify-self: start; }
 }
+
+/* ===== The research note (mock-up): text first, figures with taste ===== */
+/* White paper and neutral ink. Six sizes: 44 title, 26 section, 19 reading, 15 interface, 13 captions, 12 data.
+   Headings and interface in Geist at 500; reading text in Newsreader; data in Geist Mono.
+   Red, amber and green appear only inside the figures, each with its one meaning. */
+.note { --paper: #ffffff; --ink: #111111; --ink-2: #3d3d3d; --ink-3: #8c8c8c; --hair: rgb(0 0 0 / 0.1);
+  --red: #d23b2e; --amber: #c27c1c; --green: #1f8a5b;
+  background: var(--paper); color: var(--ink); font-family: var(--font-geist), system-ui, sans-serif; }
+[data-theme='dark'] .note { --paper: #0f0f0f; --ink: #ededed; --ink-2: #c4c4c4; --ink-3: #7e7e7e; --hair: rgb(255 255 255 / 0.12);
+  --red: #f0645a; --amber: #e5a24a; --green: #4cc38a; }
+:root:has(.note) { background: #ffffff; }
+:root[data-theme='dark']:has(.note) { background: #0f0f0f; }
+.note h1, .note h2 { font-family: var(--font-geist), system-ui, sans-serif; font-weight: 500; text-wrap: balance; }
+.note-top { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 32px; font-size: 15px; }
+.note-brand { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 16px; }
+.note-top nav { display: flex; align-items: center; gap: 28px; color: var(--ink-3); }
+.note-top nav a { transition: color 150ms ease-out; }
+.note-top nav a:hover { color: var(--ink); }
+
+.col { width: min(640px, 100% - 48px); margin-inline: auto; }
+.fig { width: min(1040px, 100% - 48px); margin: 64px auto 80px; }
+.note-hero { padding-top: 152px; }
+.note h1 { font-size: 44px; line-height: 1.12; letter-spacing: -0.025em; }
+.note h2 { margin-top: 40px; font-size: 26px; line-height: 1.25; letter-spacing: -0.015em; }
+.note .col p { margin-top: 20px; font-family: var(--font-serif), Georgia, serif; font-size: 19px; line-height: 1.62; color: var(--ink-2);
+  font-variation-settings: 'opsz' 16; hanging-punctuation: first; }
+.note .col p.lede { margin-top: 28px; color: var(--ink); }
+.note q { quotes: '“' '”'; }
+.fig figcaption { width: min(640px, 100%); margin: 24px auto 0; font-size: 13px; line-height: 1.55; color: var(--ink-3); }
+.fig figcaption b { font-weight: 500; color: var(--ink); }
+.note-end { padding-bottom: 120px; }
+.note-mock { font-family: var(--font-geist), sans-serif !important; font-size: 13px !important; color: var(--ink-3) !important; }
+.note-link { display: inline-block; margin-top: 16px; font-size: 15px; font-weight: 500; border-bottom: 1px solid var(--hair); padding-bottom: 2px; transition: border-color 150ms ease-out; }
+.note-link:hover { border-color: var(--ink); }
+.note footer .border-line { border-color: var(--hair); }
+
+/* Figure 1: every try as a tick. */
+.tt-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tt-model { font: 12px var(--font-geist-mono), monospace; fill: var(--ink-3); transition: fill 150ms ease-out; }
+.tt-model.is-on { fill: var(--ink); }
+.tt-name { font: 500 15px var(--font-geist), sans-serif; fill: var(--ink); }
+.tt-base { stroke: var(--hair); stroke-width: 1; }
+.tt-tick { stroke-width: 2; stroke-linecap: butt; transition: opacity 180ms ease-out; }
+.tt-wrong { stroke: var(--red); }
+.tt-right { stroke: var(--ink-3); opacity: 0.55; }
+.tt-escalated { stroke: var(--amber); }
+.tt-error { stroke: var(--ink-3); opacity: 0.4; }
+.tt-tick.is-dim { opacity: 0.12; }
+.tt-count { font: 500 15px var(--font-geist-mono), monospace; fill: var(--ink); }
+.tt-count .is-wrong { fill: var(--red); }
+.tt-of { fill: var(--ink-3); font-weight: 400; }
+/* The ticks rise from the baseline, left to right, row after row, once. */
+.tt-tick { transform-box: fill-box; transform-origin: 50% 100%; }
+[data-js] .tt:not([data-seen]) .tt-tick { transform: scaleY(0); }
+.tt[data-seen] .tt-tick { transition: transform 520ms cubic-bezier(0.23, 1, 0.32, 1) var(--d), opacity 180ms ease-out; }
+
+/* Figure 2: what one sentence did. */
+.os-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.os-name { font: 15px var(--font-geist), sans-serif; fill: var(--ink); }
+[data-theme='dark'] .os-ink { filter: invert(1) hue-rotate(180deg); }
+.os-grid { stroke: var(--hair); stroke-width: 1; }
+.os-axis { font: 12px var(--font-geist-mono), monospace; fill: var(--ink-3); }
+.os-span { stroke: var(--ink-3); stroke-width: 1.5; opacity: 0.5; }
+.os-note { stroke: var(--ink-3); stroke-width: 2; }
+.os-before { fill: var(--red); stroke: var(--paper); stroke-width: 2; }
+.os-after { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.os-val { font: 500 12px var(--font-geist-mono), monospace; fill: var(--ink); }
+.os-val-before { fill: var(--red); }
+/* Each ring starts on its red dot and slides to where the sentence left it. */
+[data-js] .os:not([data-seen]) .os-move { transform: translateX(var(--shift)); opacity: 0; }
+.os[data-seen] .os-move { transition: transform 900ms cubic-bezier(0.65, 0, 0.35, 1) calc(200ms + var(--i) * 110ms), opacity 200ms ease-out calc(200ms + var(--i) * 110ms); }
+[data-js] .os:not([data-seen]) .os-span { opacity: 0; }
+.os[data-seen] .os-span { transition: opacity 400ms ease-out calc(700ms + var(--i) * 110ms); }
+
+@media (max-width: 900px) {
+  .note-top { padding: 0 20px; }
+  .note-top nav { gap: 16px; }
+  .note-top nav a:nth-child(2), .note-top nav a:nth-child(3) { display: none; }
+  .note-hero { padding-top: 72px; }
+  .note h1 { font-size: 32px; }
+  .note h2 { font-size: 22px; }
+  .note .col p { font-size: 18px; }
+  .fig { margin: 48px auto 56px; }
+}
+
+/* Each figure is drawn twice, for wide and narrow screens; one shows. */
+.only-narrow { display: none; }
+@media (max-width: 640px) {
+  .only-wide { display: none; }
+  .only-narrow { display: block; }
+  .only-narrow .tt-name, .only-narrow .os-name { font-size: 14px; }
+  .only-narrow .tt-count { font-size: 14px; }
+}

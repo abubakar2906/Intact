@@ -1,96 +1,90 @@
 import Link from 'next/link';
 import { Footer } from '@/components/Footer';
-import { HomeNav } from '@/components/HomeNav';
-import { Updates } from '@/components/Updates';
-import { TwoRecords } from '@/components/a/TwoRecords';
-import { Exhibit } from '@/components/b/Exhibit';
-import { Play } from '@/components/Play';
-import { TryLedger } from '@/components/ledger/TryLedger';
-import { Statements } from '@/components/ledger/Statements';
-import { experiments, getExperimentData, method } from '@/lib/data';
-import { exhibitFacts } from '@/lib/exhibit';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { OneSentence } from '@/components/note/OneSentence';
+import { TryTicks } from '@/components/note/TryTicks';
+import { MODELS } from '@/content/models';
+import { experiments, getExperimentData, rankModels } from '@/lib/data';
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
-const X = 'https://x.com/kairo_v0';
+const ORDER = { wrong: 0, escalated: 1, right: 2, error: 3 } as const;
 
-// The home page as a lab's front page: the research first, set as a ledger on ruled paper.
-// Every line and count is read from the published runs.
+// The lab's front page as a research note: the text leads, in one reading column, and the figures break out
+// wider beside it. Mock-up: the first screen and one section. Every figure is read from the published runs.
 export default function Home() {
-  const latest = experiments[0];
-  const data = getExperimentData(latest.slug);
-  const runCount = experiments.reduce((n, e) => n + getExperimentData(e.slug).runCount, 0);
-  const traps = Object.values(method.scenarios).filter((s) => !s.followUp).length;
-  const n = String(latest.number).padStart(2, '0');
-  const first = latest.setups[0];
-  const facts = exhibitFacts(latest, data);
+  const exp = experiments[0];
+  const data = getExperimentData(exp.slug);
+  const models = rankModels(exp, data).reverse();
+  const B = exp.setups[0].id;
+  const total = data.totals[B];
+  const byId = (id: string) => exp.setups.find((s) => s.id === id);
+
+  const rows = exp.setups.map((s) => ({
+    id: s.id, name: s.name, wrong: data.totals[s.id].wrong, n: data.totals[s.id].n,
+    // Within each model, paid twice first, then handed to a person, then right: each model's red reads as one cluster.
+    tries: models.flatMap((m, mi) => [...(data.tries[m]?.[s.id] ?? [])].sort((a, b) => ORDER[a.verdict] - ORDER[b.verdict]).map((t) => ({ model: mi, verdict: t.verdict }))),
+  }));
+  const ticksLabel = `Every try in experiment 01, one mark each. ` + exp.setups.map((s) => `${s.name}: ${data.totals[s.id].wrong} of ${data.totals[s.id].n} paid twice`).join('. ') + '.';
+
+  const sentence = models.map((m) => ({
+    name: MODELS[m].name, logo: MODELS[m].logo, ink: !!MODELS[m].ink,
+    before: data.counts[m].B.wrong, note: data.counts[m].A.wrong, after: data.counts[m].C.wrong, n: data.counts[m].B.n,
+  }));
+  const sentenceLabel = 'Tries that paid twice out of 10, per model. ' + sentence.map((r) => `${r.name}: ${r.before} with no hint, ${r.note} with the note in the docs, ${r.after} with one sentence`).join('. ') + '.';
 
   return (
-    <div className="home lab">
-      <header className="lab-top">
-        <div className="home-wrap">
-          <HomeNav home cta={{ href: `/experiments/${latest.slug}`, label: 'Read the research' }} />
-          <div className="lab-hero">
-            <h1>An AI lab for agents that move money.</h1>
-            <p>We put agents in front of payment systems that get things wrong, and record where the money went.</p>
-          </div>
-        </div>
+    <div className="note">
+      <header className="note-top">
+        <Link href="/" className="note-brand"><span className="intact-mark" aria-hidden />Intact</Link>
+        <nav aria-label="Site">
+          <Link href={`/experiments/${exp.slug}`}>Research</Link>
+          <Link href="/method">Method</Link>
+          <a href="#platform">Platform</a>
+          <a href={GITHUB}>GitHub</a>
+          <ThemeToggle />
+        </nav>
       </header>
 
       <main>
-        {/* The latest research, as its ledger. */}
-        <section className="home-wrap lab-part lab-first" id="research" aria-labelledby="latest">
-          <p className="lab-kicker"><span>Experiment {n}</span><span>{latest.eyebrow}</span></p>
-          <h2 id="latest"><Link href={`/experiments/${latest.slug}`}>{latest.claim}</Link></h2>
-          <TryLedger exp={latest} data={data} setup={first.id} />
+        <section className="col note-hero">
+          <h1>Intact is a research lab studying AI agents that move money.</h1>
+          <p className="lede">
+            We give agents payment tools that fail the way real ones do, and record where the money went, never what the agent said it did.
+            Every try is published.
+          </p>
+          <p>
+            Our first experiment asked a simple question. A supplier writes in: his payout shows as failed, please send it again.
+            The bank had already paid him. With no hint that the status could be out of date, agents paid him a second time in {total.wrong} of {total.n} tries.
+          </p>
         </section>
 
-        {/* One try, read closely. */}
-        <section className="home-wrap lab-part" aria-labelledby="one">
-          <h2 id="one" className="lab-h">One try, read closely</h2>
-          {facts && (
-            <Play>
-              <TwoRecords
-                facts={facts}
-                agent={<Exhibit facts={facts} setupName={latest.setups.find((s) => s.id === facts.run.condition)?.name ?? facts.run.setupName} wrongLabel={latest.wrong} />}
-              />
-            </Play>
-          )}
+        <figure className="fig">
+          <TryTicks rows={rows} models={models.map((m) => MODELS[m].name)} label={ticksLabel} />
+          <TryTicks rows={rows} models={models.map((m) => MODELS[m].name)} label={ticksLabel} narrow />
+          <figcaption><b>Figure 1.</b> Every try in experiment 01, one mark each. Tall red marks paid the supplier twice. Short marks got it right; amber ones handed the case to a person.</figcaption>
+        </figure>
+
+        <section className="col">
+          <h2>One sentence did what the docs could not</h2>
+          <p>
+            A note in the provider’s docs, saying the status can lag, barely moved the total: {data.totals.A.wrong} of {data.totals.A.n}.
+            Two models used it. The others ignored it.
+          </p>
+          <p>
+            Then we added one line to the agent’s instructions: <q>{byId('C')?.what.replace(/[“”]/g, '')}</q> Paying twice fell to {data.totals.C.wrong} in {data.totals.C.n}.
+            The one slip resent the payment first and checked second.
+          </p>
         </section>
 
-        {/* The results, one statement per setup. */}
-        <section className="home-wrap lab-part" aria-labelledby="results">
-          <h2 id="results" className="lab-h">What stopped it</h2>
-          <Statements exp={latest} data={data} />
-          <Link href={`/experiments/${latest.slug}`} className="home-more">Every try in experiment {n}</Link>
-        </section>
+        <figure className="fig">
+          <OneSentence rows={sentence} label={sentenceLabel} />
+          <OneSentence rows={sentence} label={sentenceLabel} narrow />
+          <figcaption><b>Figure 2.</b> Tries that paid twice, out of 10, for each model. The red dot is no hint; the ring is the same model told to check with the bank first; the grey mark is the note in the docs.</figcaption>
+        </figure>
 
-        {/* The research, as a ledger of its own. */}
-        <section className="home-wrap lab-part" aria-labelledby="updates">
-          <h2 id="updates" className="lab-h">Research</h2>
-          <Updates />
-          <dl className="lab-counts">
-            <div><dt>{traps}</dt><dd>traps</dd></div>
-            <div><dt>{runCount}</dt><dd>tries, every transcript public</dd></div>
-            <div><dt>{latest.models.length}</dt><dd>models</dd></div>
-          </dl>
-          <div className="lab-links">
-            <Link href="/method" className="home-more">Method</Link>
-            <a href={GITHUB} className="home-more">Code and transcripts</a>
-          </div>
-        </section>
-
-        {/* What we build from it: small, last. */}
-        <section className="home-wrap lab-part" id="platform" aria-labelledby="build">
-          <h2 id="build" className="lab-h">What we build from it</h2>
-          <div className="lab-guard">
-            <p>A guard between agents and their payment tools. It checks with the bank before any repeat payment.</p>
-            <div className="lab-stamp-line" aria-label="A repeat payment, stopped by the guard">
-              <span className="lg-no">0042</span>
-              <span>Repeat payment for invoice INV-88</span>
-              <span className="lab-stamp">Stopped. Already paid</span>
-            </div>
-            <a href={X} className="home-more">In private testing. Follow along on X</a>
-          </div>
+        <section className="col note-end">
+          <p className="note-mock">Mock-up: the first screen and one section. The rest of the page follows in this style.</p>
+          <Link href={`/experiments/${exp.slug}`} className="note-link">Read experiment 01</Link>
         </section>
       </main>
       <Footer wide />

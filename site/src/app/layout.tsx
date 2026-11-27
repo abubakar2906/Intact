@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono, Google_Sans_Flex, Inter_Tight, Martian_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Google_Sans_Flex, Inter_Tight, Martian_Mono, Newsreader } from 'next/font/google';
 import './globals.css';
 
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
@@ -8,6 +8,8 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 const interTight = Inter_Tight({ variable: '--font-inter-tight', subsets: ['latin'] });
 const martian = Martian_Mono({ variable: '--font-martian', subsets: ['latin'] });
 // The home page: soft curves (the ROND axis), still bold enough to carry a headline.
+// Reading text on the lab pages: a serif drawn for long text on screens.
+const serif = Newsreader({ variable: '--font-serif', subsets: ['latin'], axes: ['opsz'] });
 const soft = Google_Sans_Flex({ variable: '--font-soft', subsets: ['latin'], axes: ['ROND'] });
 
 export const metadata: Metadata = {
@@ -26,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} ${interTight.variable} ${martian.variable} ${soft.variable}`}
+      className={`${geist.variable} ${geistMono.variable} ${interTight.variable} ${martian.variable} ${soft.variable} ${serif.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
