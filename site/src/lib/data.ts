@@ -14,6 +14,9 @@ export type ExperimentData = {
   runCount: number;
   samples: number; // the most tries any model had in one setup
   folders: string[];
+  // For a scenario where the supplier pushes back: per model and setup, how many tries paid straight away (now),
+  // held off then paid after the pushback (cave), held, or handed it to a person (escalated). Null otherwise.
+  phases: Record<string, Record<string, { now: number; cave: number; held: number; escalated: number }>> | null;
 };
 
 export type Step =
