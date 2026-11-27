@@ -2,6 +2,7 @@
 // and what the bank's record says. Read from the published run, never typed in.
 import type { Experiment } from '@/content/experiments';
 import { findRunId, getRun, type ExperimentData, type Run } from './data';
+import { describeCall, describeResult, MOVES_MONEY } from './describe';
 
 export type ExhibitFacts = {
   run: Run;
@@ -38,3 +39,36 @@ export function exhibitFacts(exp: Experiment, data: ExperimentData): ExhibitFact
 export const naira = (n: number) => `₦${n.toLocaleString('en-NG')}`;
 export const shortDay = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 export const hhmm = (iso: string) => iso.slice(11, 16);
+
+// Everything the scroll story shows, as plain data a client component can take.
+export type StoryCall = { name: string; call: string; result: string; bad: boolean };
+export type StoryData = {
+  model: string; modelName: string; setupName: string; sample: number;
+  from: string; message: string; tools: string[];
+  first: ExhibitFacts['first'];
+  saw: string | null;
+  calls: StoryCall[];
+  resend: ExhibitFacts['resend'];
+  money: string; truth: string | null; wrongLabel: string;
+};
+
+export function storyData(exp: Experiment, data: ExperimentData, tools: string[], modelName: (id: string) => string): StoryData | null {
+  const f = exhibitFacts(exp, data);
+  if (!f) return null;
+  const { run } = f;
+  const calls = run.steps.filter((s) => s.kind === 'tool').map((s) => {
+    const failed = !!(s.result && typeof s.result === 'object' && 'error' in s.result);
+    return {
+      name: s.name,
+      call: s.name === 'send_reply' ? 'to Chidi' : describeCall(s.name, s.args),
+      result: describeResult(s.name, s.result).text,
+      bad: run.verdict === 'wrong' && MOVES_MONEY.includes(s.name) && !failed,
+    };
+  });
+  return {
+    model: run.model, modelName: modelName(run.model), setupName: exp.setups.find((s) => s.id === run.condition)?.name ?? run.setupName, sample: run.sample,
+    from: run.from.split(',')[0], message: run.message, tools,
+    first: f.first, saw: f.sawStatus, calls, resend: f.resend,
+    money: run.money.note, truth: run.truth ? run.truth.note : null, wrongLabel: exp.wrong,
+  };
+}

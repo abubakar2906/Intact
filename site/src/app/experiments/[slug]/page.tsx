@@ -6,14 +6,15 @@ import { Footer } from '@/components/Footer';
 import { Ladder } from '@/components/a/Ladder';
 import { TwoRecords } from '@/components/a/TwoRecords';
 import { Exhibit } from '@/components/b/Exhibit';
-import { exhibitFacts } from '@/lib/exhibit';
+import { exhibitFacts, storyData } from '@/lib/exhibit';
 import { ModelSplit } from '@/components/ModelSplit';
 import { RunCard } from '@/components/RunCard';
 import { TryGrid } from '@/components/TryGrid';
 import { ModelName } from '@/components/ModelName';
 import { ChartFrame } from '@/components/ChartFrame';
 import { ResultsTable } from '@/components/ResultsTable';
-import { HowItWorks } from '@/components/HowItWorks';
+import { ScrollStory } from '@/components/ScrollStory';
+import { MODELS } from '@/content/models';
 import { CopyButton } from '@/components/CopyButton';
 import { PublicTally } from '@/components/PublicTally';
 import { PUBLIC_PROMPTS } from '@/content/public-prompts';
@@ -39,6 +40,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
   const data = getExperimentData(slug);
   const scenario = method.scenarios[exp.scenario];
   const facts = exhibitFacts(exp, data);
+  const story = storyData(exp, data, method.tools.map((t) => t.name), (id) => MODELS[id].name);
   const n = String(exp.number).padStart(2, '0');
   const wrong = exp.wrong.toLowerCase();
   const year = exp.date.slice(0, 4);
@@ -145,7 +147,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <p className="exp-body">
             The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.
           </p>
-          <div className="mt-10"><HowItWorks facts={facts} tools={method.tools.map((t) => t.name)} /></div>
+          {story && <ScrollStory story={story} />}
         </section>
 
         <section id="every-try" className="exp-part scroll-mt-8">

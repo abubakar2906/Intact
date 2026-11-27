@@ -1,15 +1,21 @@
 import Link from 'next/link';
 import { Footer } from '@/components/Footer';
-import { ResultsTable } from '@/components/ResultsTable';
+import { Ladder } from '@/components/a/Ladder';
+import { GuardFlow } from '@/components/GuardFlow';
+import { ScrollScale } from '@/components/ScrollScale';
+import { ScrollStory } from '@/components/ScrollStory';
 import { TryField, type FieldTag } from '@/components/TryField';
 import { HomeNav } from '@/components/HomeNav';
-import { HowItWorks } from '@/components/HowItWorks';
 import { PLATFORM } from '@/content/how-it-works';
 import { Updates } from '@/components/Updates';
 import { ModelLogo } from '@/components/ModelName';
 import { MODELS } from '@/content/models';
 import { experiments, getExperimentData, method, rankModels } from '@/lib/data';
-import { exhibitFacts } from '@/lib/exhibit';
+import { exhibitFacts, storyData } from '@/lib/exhibit';
+import { TwoRecords } from '@/components/a/TwoRecords';
+import { Exhibit } from '@/components/b/Exhibit';
+import { Findings } from '@/components/Findings';
+import { Play } from '@/components/Play';
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
 const X = 'https://x.com/kairo_v0';
@@ -22,6 +28,8 @@ export default function Home() {
   const runCount = experiments.reduce((n, e) => n + getExperimentData(e.slug).runCount, 0);
   const traps = Object.values(method.scenarios).filter((s) => !s.followUp).length;
   const n = String(latest.number).padStart(2, '0');
+  const facts = exhibitFacts(latest, data);
+  const story = storyData(latest, data, method.tools.map((t) => t.name), (id) => MODELS[id].name);
 
   // The hero draws every try of the latest experiment, best model first.
   const models = rankModels(latest, data);
@@ -64,7 +72,64 @@ export default function Home() {
             <TryField setups={setups} tags={tags} label={label} />
           </div>
 
-          <figure className="home-shot" id="platform">
+        </div>
+      </header>
+
+      <main>
+        {/* Chapter 1: one real try, the agent's record beside the bank's. */}
+        <section className="band" id="research" aria-labelledby="ch1">
+          <div className="home-wrap">
+            <div className="ch-head">
+              <h2 id="ch1">One payment. Paid twice.</h2>
+              <p>Chidi asks for his {facts ? `₦${facts.first.amountNaira.toLocaleString('en-NG')}` : 'money'} again, because Ledgerline says the transfer failed. The bank paid him days ago. This is one agent’s try, call by call, beside his bank statement.</p>
+            </div>
+            {facts && (
+              <Play>
+                <TwoRecords
+                  facts={facts}
+                  agent={<Exhibit facts={facts} setupName={latest.setups.find((s) => s.id === facts.run.condition)?.name ?? facts.run.setupName} wrongLabel={latest.wrong} />}
+                />
+              </Play>
+            )}
+          </div>
+        </section>
+
+        {/* Chapter 2: how the benchmark grades a try, told as you scroll. */}
+        <section className="home-wrap chapter" aria-labelledby="how-h">
+          <div className="ch-head">
+            <h2 id="how-h">How Intact grades it</h2>
+            <p>The agent only acts through tools. Every call goes through Ledgerline, and the grade is read from where the money went, never from what the agent said.</p>
+          </div>
+          {story && <ScrollStory story={story} />}
+        </section>
+
+        {/* Chapter 3: what we found, every try. */}
+        <section className="band" aria-labelledby="results">
+          <div className="home-wrap">
+            <div className="ch-head">
+              <h2 id="results">What we found</h2>
+              <p>Five open models, ten tries each, in four setups. How often each setup ended with the supplier {latest.wrong.toLowerCase()}:</p>
+            </div>
+            <Findings exp={latest} data={data} />
+            <div className="home-ladder"><Ladder exp={latest} data={data} /></div>
+            <Link href={`/experiments/${latest.slug}`} className="home-more">Open every try in experiment {n}</Link>
+          </div>
+        </section>
+
+        {/* Chapter 4: what stops it. */}
+        <section className="home-wrap chapter" id="platform" aria-labelledby="platform-h">
+          <div className="ch-head">
+            <h2 id="platform-h">{PLATFORM.heading}</h2>
+            <p>{PLATFORM.body}</p>
+          </div>
+          <GuardFlow />
+          <ul className="home-rules">
+            {PLATFORM.rules.map((r) => (
+              <li key={r.title}><b>{r.title}</b><span>{r.body}</span></li>
+            ))}
+          </ul>
+          <ScrollScale className="home-shot-wrap">
+          <figure className="home-shot">
             {/* Both pictures load up front and sit in the same spot. The dark one lies on top and fades in and out
                 with the theme, so a switch never waits on a download. The light one stays opaque underneath. */}
             <div className="home-shot-stack">
@@ -74,67 +139,30 @@ export default function Home() {
               <img className="home-shot-dark" src="/img/platform.webp" width={2880} height={1800} alt="" aria-hidden />
             </div>
           </figure>
-        </div>
-      </header>
-
-      <main>
-        <section className="home-wrap home-part" aria-labelledby="both">
-          <h2 id="both">We find where agents lose money. Then we build what stops it.</h2>
-          <div className="home-two">
-            <div id="research">
-              <h3>The benchmark <span>open source</span></h3>
-              <p>Agents get a payment provider, Ledgerline, that fails the way real ones do: stale statuses, late webhooks, a supplier who insists. We grade where the money went, not what the agent said.</p>
-              <ul className="home-items">
-                <li><b>{traps} traps</b><span>Each one a way payments really fail</span></li>
-                <li><b>{runCount} tries</b><span>Published in full, good and bad</span></li>
-                <li><b>Next</b><span>The models agents actually run on, up to Opus</span></li>
-              </ul>
-              <Link href="/method" className="home-more">Read the method</Link>
-            </div>
-            <div>
-              <h3>The platform <span>private testing</span></h3>
-              <p>Sits between your agents and your payment provider. Built from what the benchmark shows breaks.</p>
-              <ul className="home-items">
-                <li><b>The guard</b><span>Checks with the bank before any repeat payment</span></li>
-                <li><b>Approvals</b><span>You decide on anything over your amount</span></li>
-                <li><b>Activity</b><span>Every decision, with the reason behind it</span></li>
-              </ul>
-              <a href={X} className="home-more">Follow the build on X</a>
-            </div>
-          </div>
-        </section>
-
-        <section className="home-wrap home-part" aria-labelledby="how-h">
-          <h2 id="how-h">How the benchmark works</h2>
-          <HowItWorks facts={exhibitFacts(latest, data)} tools={method.tools.map((t) => t.name)} />
-        </section>
-
-        <section className="home-wrap home-part" aria-labelledby="results">
-          <p className="home-kicker">Experiment {n}, {latest.eyebrow.toLowerCase()}</p>
-          <h2 id="results">A payout shows “failed”. The bank already paid. Do agents pay again?</h2>
-          <div className="home-results">
-            <ResultsTable exp={latest} data={data} />
-          </div>
-          <Link href={`/experiments/${latest.slug}`} className="home-more">Open every try</Link>
-        </section>
-
-        <section className="home-wrap home-part" aria-labelledby="platform-h">
-          <h2 id="platform-h">{PLATFORM.heading}</h2>
-          <p className="home-sub">{PLATFORM.body}</p>
-          <ul className="home-rules">
-            {PLATFORM.rules.map((r) => (
-              <li key={r.title}><b>{r.title}</b><span>{r.body}</span></li>
-            ))}
-          </ul>
+          </ScrollScale>
           <p className="home-note">In the benchmark, a lock in the transfer tool stopped every repeat payment: {data.totals.D ? `${data.totals.D.wrong} of ${data.totals.D.n}` : 'none got through'}. The guard is in private testing now.</p>
         </section>
 
-        <section className="home-wrap home-part home-updates" aria-labelledby="updates">
-          <h2 id="updates">Updates</h2>
-          <Updates />
+        {/* Chapter 5: everything is public. */}
+        <section className="home-wrap chapter" aria-labelledby="updates">
+          <div className="ch-head">
+            <h2 id="updates">Every try is public</h2>
+            <p>The question and how we would read it are written down before each run. Every transcript, good and bad, is in the repository.</p>
+          </div>
+          <dl className="public">
+            <div><dt>{traps}</dt><dd>traps, each a way payments really fail</dd></div>
+            <div><dt>{runCount}</dt><dd>tries, published in full</dd></div>
+            <div><dt>{latest.models.length}</dt><dd>open models so far. Next: the models agents actually run on, up to Opus</dd></div>
+          </dl>
+          <div className="public-links">
+            <Link href="/method" className="home-more">Read the method</Link>
+            <a href={GITHUB} className="home-more">See the code and transcripts</a>
+          </div>
+          <div className="home-updates"><Updates /></div>
         </section>
 
         <section className="home-wrap home-close">
+          <span className="gate-object" aria-hidden />
           <h2>Before an AI agent touches a company’s money, it should pass Intact.</h2>
           <div className="home-ctas">
             <a href={GITHUB} className="home-btn home-btn-main">Run it on GitHub</a>
