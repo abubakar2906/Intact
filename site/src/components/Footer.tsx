@@ -1,9 +1,10 @@
 import Link from 'next/link';
 
-export function Footer() {
+// `wide` lines the footer up with pages in the new look (.home-wrap), which are a little wider than the older pages.
+export function Footer({ wide = false }: { wide?: boolean }) {
   return (
     <footer>
-      <div className="mx-auto w-full max-w-6xl px-6 sm:px-10">
+      <div className={wide ? 'home-wrap' : 'mx-auto w-full max-w-6xl px-6 sm:px-10'}>
         <div className="flex flex-wrap items-end justify-between gap-6 border-t border-line py-10">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 font-display text-[18px] font-medium tracking-[-0.03em]"><span className="intact-mark" style={{ width: 18, height: 18 }} aria-hidden />Intact</Link>

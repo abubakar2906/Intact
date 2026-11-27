@@ -207,7 +207,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           </div>
         </section>
       </main>
-      <div className="exp-foot"><Footer /></div>
+      <div className="exp-foot"><Footer wide /></div>
     </div>
   );
 }
