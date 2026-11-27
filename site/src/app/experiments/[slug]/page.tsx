@@ -54,7 +54,6 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <HomeNav cta={{ href: REPO, label: 'Run it on GitHub' }} />
           <div className="exp-intro">
             <h1>{exp.claim}</h1>
-            <p className="home-lede exp-lede">{exp.lede}</p>
             <div className="home-ctas">
               <a href="#every-try" className="home-btn home-btn-main">Open every try</a>
               <a href="#data" className="home-btn home-btn-quiet">Get the data</a>
@@ -71,22 +70,23 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
       </header>
 
       <main>
-        <section className="home-wrap exp-why" aria-label="Why it matters">
-          <p className="exp-why-text">{exp.whyItMatters}</p>
-        </section>
-
         {/* What we found: the four figures, every try, then the same counts by model. */}
         <section className="band" aria-labelledby="found">
           <div className="home-wrap">
             <div className="ch-head">
-              <h2 id="found">What we found</h2>
-              <p>{exp.models.length} open models, {data.samples} tries each, in {exp.setups.length} setups. How often each setup ended with the supplier {wrong}:</p>
+              <h2 id="found">How often agents {wrong}</h2>
             </div>
             <Findings exp={exp} data={data} />
-            <p className="ch-sub">Every try, one square each, grouped by model. Red means it {wrong}, grey that it got it right, an outline that it handed the case to a person.</p>
+            <ul className="legend" aria-label="Key">
+              <li><i className="sq-wrong" />{exp.wrong}</li>
+              <li><i className="sq-right" />Got it right</li>
+              <li><i className="sq-escalated" />Handed to a person</li>
+            </ul>
             <div className="home-ladder"><Ladder exp={exp} data={data} /></div>
-            <h3 className="ch-h3">The same counts, by model</h3>
-            <div className="exp-card exp-table"><ResultsTable exp={exp} data={data} /></div>
+            <details className="exp-details counts">
+              <summary>Counts by model</summary>
+              <div className="exp-card exp-table"><ResultsTable exp={exp} data={data} /></div>
+            </details>
           </div>
         </section>
 
@@ -148,7 +148,6 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
         <section className="home-wrap chapter" aria-labelledby="how">
           <div className="ch-head">
             <h2 id="how">How Intact grades it</h2>
-            <p>The agent only acts through tools. The tools talk to Ledgerline, and Ledgerline talks to the bank. The grade is read from what moved, never from what the agent says.</p>
           </div>
           {story && <ScrollStory story={story} />}
         </section>
@@ -158,7 +157,6 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           <div className="home-wrap">
             <div className="ch-head">
               <h2 id="every">Every try</h2>
-              <p>Each square is one try. Open any of them to see exactly what the agent did and said.</p>
             </div>
             <div className="exp-card exp-pad exp-tries">
               <TryGrid models={rankModels(exp, data)} setups={exp.setups.map((s) => ({ id: s.id, name: s.name }))} tries={data.tries} wrongLabel={exp.wrong} />
@@ -183,7 +181,6 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
         <section className="home-wrap chapter" aria-labelledby="setup">
           <div className="ch-head">
             <h2 id="setup">The setup, and its limits</h2>
-            <p>What the agent was given, word for word, and what this run can and cannot tell you.</p>
           </div>
           <div className="setup">
             <div>

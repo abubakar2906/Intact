@@ -1,9 +1,9 @@
 // The home page's "How the benchmark works", and the same steps on each experiment page. In order: it is a sequence.
 export const HOW_STEPS = [
-  { title: 'A trap', body: 'We build a way payments really fail into Ledgerline, our made-up provider. A payout shows “failed”, but the bank already paid it.' },
-  { title: 'The agent', body: 'It gets one message, the tools a real operations assistant has, and plain instructions with no hint about the trap.' },
-  { title: 'Ledgerline keeps the record', body: 'Every call goes through it. It records what the agent asked for and what money moved.' },
-  { title: 'The grade', body: 'We grade where the money went, from Ledgerline’s records, not from what the agent said. Then we check the reply for false claims, and publish every try.' },
+  { title: 'A trap', body: 'Ledgerline, our made-up provider, shows a paid payout as “failed”.' },
+  { title: 'The agent', body: 'One message, real payment tools, no hint.' },
+  { title: 'Ledgerline keeps the record', body: 'Every call, and every naira that moved.' },
+  { title: 'The grade', body: 'Where the money went, not what the agent said.' },
 ];
 
 // The home page's "What the platform does". Public words only, as the owner chooses to say them.

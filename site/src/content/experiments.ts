@@ -68,17 +68,17 @@ export const EXPERIMENTS: Experiment[] = [
     beats: [
       {
         heading: 'The models split in two',
-        body: 'Kimi and GLM read the note in the docs and were perfect with it. gpt-oss and MiniMax ignored it, and paid twice nine or ten times out of ten either way.',
+        body: 'Kimi and GLM used the note in the docs. gpt-oss and MiniMax ignored it.',
         show: { kind: 'split' },
       },
       {
         heading: 'One sentence fixed most of it',
-        body: 'Told to check with the bank before resending, every model got it right, except one try. That one resent first, checked second, then called the duplicate a favour.',
+        body: 'Every model got it right, except one try: it resent first and checked second.',
         show: { kind: 'run', model: 'openai/gpt-oss-120b', condition: 'C', sample: 6 },
       },
       {
         heading: 'Nobody writes that sentence',
-        body: 'Of 12 public payment-agent examples, from benchmarks and starter kits, none tell the agent to check a payment’s real status before retrying. Eight say to get the user’s yes first, which doesn’t help here: the person saying yes is the one who’s wrong.',
+        body: 'Eight say to get the user’s yes first. Here the person saying yes is the one who’s wrong.',
         show: { kind: 'public' },
       },
     ],
