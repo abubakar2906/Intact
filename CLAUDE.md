@@ -85,8 +85,8 @@ Live at https://intact-bench.vercel.app. The home, experiment and method pages s
 
 As of 27 November, after the chapters redesign:
 
-1. **Bring the results list (`/experiments`) into the same style.** The method and experiment pages are done.
-2. **Platform on the home page:** it is no longer there. Add it back in this style when the owner asks.
+1. **All pages share the lab style.** Home sections: opening, 01 Figure 1, 02 one sentence, 03 what we build from it (public wording, dashboard picture), 04 research (`ResearchList`).
+2. **Platform section:** public wording only, from `PLATFORM` in `content/how-it-works.ts`.
 3. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
 4. **Design skills** are in `.claude/skills/`: frontend-design (Anthropic, Apache 2.0), emil-design-eng and choreograph (Emil Kowalski, MIT), unslop (CC BY 4.0). Use them in that order, with dataviz for charts.
 5. **Dev server note:** Turbopack's Tailwind loader can keep serving old CSS. Restart `next dev` with `.next/dev` removed after CSS edits, and never run `next build` beside a running dev server.

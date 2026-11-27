@@ -4,9 +4,12 @@ import { NxHeader } from '@/components/NxHeader';
 import { StepChart } from '@/components/grid/StepChart';
 import { OneSentence } from '@/components/note/OneSentence';
 import { MODELS } from '@/content/models';
+import { PLATFORM } from '@/content/how-it-works';
+import { ResearchList } from '@/components/ResearchList';
 import { experiments, formatDate, getExperimentData, rankModels } from '@/lib/data';
 
 const GITHUB = 'https://github.com/abubakar2906/Intact';
+const SHOT_ALT = 'The Intact platform: payments checked this week, the flow of money through the guard, the latest decisions, and a payment waiting for approval.';
 
 // The lab's front page: a research note on a sidebar grid. Facts and section numbers sit in a narrow column
 // on the left; the text reads in the column beside it; figures run across the full width.
@@ -83,6 +86,37 @@ export default function Home() {
           <OneSentence rows={sentence} label={sentenceLabel} narrow />
           <figcaption className="nx-cap"><span className="nx-side">Figure 2</span><span className="nx-main">Tries that paid twice, out of 10, for each model. The red dot is no hint; the ring is the same model told to check with the bank first; the grey mark is the note in the docs.</span></figcaption>
         </figure>
+
+        {/* What we build from the research. Public wording only. */}
+        <section className="nx-row nx-section" id="platform">
+          <p className="nx-side">03</p>
+          <div className="nx-main nx-prose">
+            <h2>What we build from it</h2>
+            <p>{PLATFORM.heading} {PLATFORM.body}</p>
+            <ol className="nx-steps">
+              {PLATFORM.rules.map((r) => <li key={r.title}><span><b>{r.title}.</b> {r.body}</span></li>)}
+            </ol>
+            <p>In the benchmark, a lock in the transfer tool stopped every repeat payment: {data.totals.D ? `${data.totals.D.wrong} of ${data.totals.D.n}` : 'none got through'}. The guard is in private testing now.</p>
+          </div>
+        </section>
+        <figure className="nx-fig">
+          {/* Both pictures load up front and sit in the same spot; the dark one fades over the light one with the theme. */}
+          <div className="nx-shot home-shot-stack">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="home-shot-light" src="/img/platform-light.webp" width={2880} height={1800} alt={SHOT_ALT} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="home-shot-dark" src="/img/platform.webp" width={2880} height={1800} alt="" aria-hidden />
+          </div>
+          <figcaption className="nx-cap"><span className="nx-side">Figure 3</span><span className="nx-main">The platform’s dashboard, with made-up data for a made-up business: payments checked this week, money flowing through the guard, the latest decisions, and one payment waiting for a person.</span></figcaption>
+        </figure>
+
+        <section className="nx-row nx-section" id="research">
+          <p className="nx-side">04</p>
+          <div className="nx-main nx-prose"><h2>Research</h2></div>
+        </section>
+        <section className="nx-list">
+          <ResearchList />
+        </section>
 
         <section className="nx-row nx-end">
           <p className="nx-side">Read more</p>
