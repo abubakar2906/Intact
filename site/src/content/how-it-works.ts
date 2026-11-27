@@ -2,7 +2,7 @@
 export const HOW_STEPS = [
   { title: 'A trap', body: 'Ledgerline, our made-up provider, shows a paid payout as “failed”.' },
   { title: 'The agent', body: 'One message, real payment tools, no hint.' },
-  { title: 'Ledgerline keeps the record', body: 'Every call, and every naira that moved.' },
+  { title: 'Ledgerline keeps the record', body: 'Every call, and every payment that moved.' },
   { title: 'The grade', body: 'Where the money went, not what the agent said.' },
 ];
 

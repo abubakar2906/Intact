@@ -901,6 +901,7 @@ h1, h2, h3 {
 .os-note { stroke: var(--ink-3); stroke-width: 2; }
 .os-before { fill: var(--red); stroke: var(--paper); stroke-width: 2; }
 .os-after { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.os-after.is-same { fill: var(--red); }
 .os-val { font: 500 12px var(--font-geist-mono), monospace; fill: var(--ink); }
 .os-val-before { fill: var(--red); }
 /* Each ring starts on its red dot and slides to where the sentence left it. */
@@ -1006,4 +1007,62 @@ h1, h2, h3 {
   .sc-names { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 16px; }
   .sc-names li:nth-child(3) { border-left: 0; }
   .nx footer .home-wrap { margin: 0 20px; }
+}
+
+/* Older pieces (the try, the statement, the try grid, the tallies) read the home and Tailwind tokens.
+   On the lab's pages those tokens point at the lab's own, so the pieces come out flat: hairlines, no cards. */
+.nx { --home-text: var(--ink); --home-text-2: var(--ink-2); --home-text-3: var(--ink-3); --home-edge: var(--hair); --home-underline: var(--hair);
+  --home-card-top: var(--paper); --home-card-bottom: var(--paper); --home-key-top: var(--paper); --home-key-bottom: var(--paper);
+  --home-lit: transparent; --home-drop: transparent; --home-frame-drop: transparent; --home-frame: rgb(0 0 0 / 0.03); --home-page: var(--paper);
+  --try-wrong: var(--red); --try-kept: var(--green); --rec-wash: rgb(210 59 46 / 0.06); --exb-wash: rgb(210 59 46 / 0.05);
+  --font-soft: var(--font-geist); --font-code: var(--font-geist-mono), ui-monospace, monospace;
+  --color-paper: var(--paper); --color-ink: var(--ink); --color-muted: var(--ink-2); --color-faint: var(--ink-3); --color-line: var(--hair);
+  --color-red: var(--red); --color-wash: rgb(0 0 0 / 0.03); --color-track: #ececec; --color-redwash: rgb(210 59 46 / 0.06); --color-correct: #d6d6d6; --color-scrim: rgb(0 0 0 / 0.35); }
+[data-theme='dark'] .nx { --home-frame: rgb(255 255 255 / 0.04); --rec-wash: rgb(240 100 90 / 0.1); --exb-wash: rgb(240 100 90 / 0.08);
+  --color-wash: rgb(255 255 255 / 0.04); --color-track: #262626; --color-redwash: rgb(240 100 90 / 0.1); --color-correct: #3a3a3a; --color-scrim: rgb(0 0 0 / 0.6); }
+.nx .uppercase { text-transform: none; letter-spacing: 0; }
+.nx .rec-said, .nx .rec-bank, .nx .exb { border-radius: 4px; box-shadow: inset 0 0 0 1px var(--hair); }
+
+/* ===== Experiment and method pages in the lab's style ===== */
+.nx-main-wide { grid-column: 4 / 12; }
+.nx-prose > p a, .nx-cap a, .nx-facts a { border-bottom: 1px solid var(--hair); transition: border-color 150ms ease-out; }
+.nx-prose > p a:hover, .nx-cap a:hover, .nx-facts a:hover { border-color: var(--ink); }
+.nx-prose b { font-weight: 600; color: var(--ink); }
+.nx-prose h2 + p { margin-top: 16px; }
+/* A figure that sits under the text column rather than across the page: columns 4 to 11. */
+.nx-fig-narrow > :not(figcaption):not(details) { margin-left: calc((100% - 11 * 24px) / 12 * 3 + 72px); margin-right: calc((100% - 11 * 24px) / 12 + 24px); }
+.nx-fig .exb, .nx-fig .rec { margin: 0; padding-bottom: 0; }
+.nx-fig .exb { padding: 24px 28px 8px; }
+.nx-fig .rec .exb { padding: 24px 28px 8px; }
+.nx-details { margin-top: 24px; }
+.nx-details summary { cursor: pointer; font-size: 14px; color: var(--ink-3); transition: color 150ms ease-out; }
+.nx-details summary:hover { color: var(--ink); }
+.nx-details[open] summary { margin-bottom: 16px; }
+.nx-steps { margin-top: 20px; counter-reset: step; font-family: var(--font-serif), Georgia, serif; font-size: 18px; line-height: 1.55; color: var(--ink-2); }
+.nx-steps li { counter-increment: step; display: grid; grid-template-columns: 32px 1fr; padding: 12px 0; border-top: 1px solid var(--hair); }
+.nx-steps li::before { content: counter(step); font: 13px/1.9 var(--font-geist-mono), monospace; color: var(--ink-3); }
+.nx-steps b { font-family: var(--font-geist), sans-serif; font-weight: 500; font-size: 16px; }
+.nx-quote { margin: 16px 0 0; padding: 4px 0 4px 20px; border-left: 2px solid var(--ink); font-family: var(--font-serif), Georgia, serif; font-size: 20px; line-height: 1.55; color: var(--ink); }
+.nx-setup { margin-top: 20px; }
+.nx-setup-name { font-size: 15px; font-weight: 500; }
+.nx-setup pre { margin-top: 8px; padding: 16px; white-space: pre-wrap; font: 13px/1.6 var(--font-geist-mono), monospace; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--hair); border-radius: 4px; }
+.nx-mono-list { margin-top: 16px; padding: 16px 20px; display: grid; gap: 10px; font: 14px/1.6 var(--font-geist-mono), monospace; color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair); border-radius: 4px; }
+.nx-defs { margin-top: 16px; border-top: 1px solid var(--hair); }
+.nx-defs div { display: grid; grid-template-columns: 248px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--hair); }
+.nx-defs dt { font: 14px/1.6 var(--font-geist-mono), monospace; color: var(--ink); }
+.nx-defs dd { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.nx-defs-wide div { grid-template-columns: 1fr; gap: 4px; }
+.nx-defs-wide dt { font: 500 16px var(--font-geist), sans-serif; }
+.nx-downloads { margin-top: 24px; }
+.nx-downloads .nx-side { color: var(--ink); }
+.nx-cite { font-family: var(--font-serif), Georgia, serif; font-size: 18px; line-height: 1.55; color: var(--ink-2); }
+.nx-cite-actions { display: flex; gap: 8px; margin-top: 16px; }
+.nx-bib { margin-top: 16px; padding: 16px; overflow-x: auto; font: 13px/1.6 var(--font-geist-mono), monospace; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--hair); border-radius: 4px; }
+@media (max-width: 900px) {
+  .nx-main-wide { grid-column: 1 / -1; }
+  .nx-fig-narrow > :not(figcaption):not(details) { margin-left: 0; margin-right: 0; }
+  .nx-fig .exb, .nx-fig .rec .exb { padding: 20px 16px 8px; }
+  .nx-defs div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .nx-steps { font-size: 17px; }
+  .nx .gp-multiples { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 16px; }
 }

@@ -1,79 +1,130 @@
 import type { Metadata } from 'next';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Footer } from '@/components/Footer';
-import { experiments, getExperimentData, method } from '@/lib/data';
+import { NxHeader } from '@/components/NxHeader';
+import { Exhibit } from '@/components/b/Exhibit';
+import { Play } from '@/components/Play';
 import { PublicTally } from '@/components/PublicTally';
+import { HOW_STEPS } from '@/content/how-it-works';
+import { MODELS } from '@/content/models';
 import { PUBLIC_PROMPTS } from '@/content/public-prompts';
+import { experiments, getExperimentData, method } from '@/lib/data';
+import { exhibitFacts } from '@/lib/exhibit';
 
 export const metadata: Metadata = { title: 'Method', description: 'How Intact tests AI agents that move money, and how every try is graded.' };
 
+const REPO = 'https://github.com/abubakar2906/Intact';
+
+// The method, as a research note on the lab's sidebar grid.
 export default function MethodPage() {
-  const samples = getExperimentData(experiments[0].slug).samples;
+  const exp = experiments[0];
+  const data = getExperimentData(exp.slug);
+  const samples = data.samples;
   const notes = method.notes.split('\n').filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
+  const traps = Object.entries(method.scenarios);
+  const facts = exhibitFacts(exp, data);
+  const setupName = (id: string) => exp.setups.find((s) => s.id === id)?.name ?? id;
+
   return (
-    <>
-    <main className="flex-1 pb-24">
-      <SiteHeader />
-      <article className="mx-auto max-w-4xl px-6 sm:px-10">
-        <header className="pt-10 sm:pt-16">
-          <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-faint">Method</p>
-          <h1 className="mt-5 text-[40px] leading-[1.02] tracking-[-0.04em] sm:text-[64px]">How Intact tests an agent</h1>
-          <p className="mt-6 text-[18px] leading-relaxed text-muted">
-            An agent gets one message, the tools a real operations assistant would have, and a payment system that sometimes tells it something that isn’t true yet. We record every call it makes and grade where the money ended up.
-          </p>
-        </header>
+    <div className="note nx">
+      <NxHeader />
+      <main>
+        <section className="nx-row nx-hero">
+          <p className="nx-side">Method</p>
+          <div className="nx-main"><h1>How Intact tests an agent</h1></div>
+        </section>
 
-        <Section title="The payment system">
-          <p>Ledgerline is a made-up payment provider. It behaves like real ones in the ways that trip people up, but it is not a copy of any one of them. These are the notes the agent is given about it, word for word:</p>
-          <ul className="mt-5 flex flex-col gap-3 rounded-xl bg-wash p-5 font-mono text-[14px] leading-relaxed text-ink sm:p-6">
-            {notes.map((n) => <li key={n}>{n}</li>)}
-          </ul>
-          <p className="mt-5">Some experiments remove or add one of these lines on purpose. Each experiment page shows the exact instructions for every setup.</p>
-        </Section>
-
-        <Section title="The tools">
-          <p>The agent acts only through these. It decides which to call and when.</p>
-          <dl className="mt-5 divide-y divide-line border-y border-line">
-            {method.tools.map((t) => (
-              <div key={t.name} className="grid gap-1 py-3 sm:grid-cols-[220px_1fr] sm:gap-6">
-                <dt className="font-mono text-[14px] text-ink">{t.name}</dt>
-                <dd className="text-[15px] text-muted">{t.description}</dd>
-              </div>
-            ))}
+        <section className="nx-row nx-intro">
+          <dl className="nx-side nx-facts">
+            <div><dt>Traps</dt><dd>{traps.filter(([, s]) => !s.followUp).length}</dd></div>
+            <div><dt>Tools</dt><dd>{method.tools.length}</dd></div>
+            <div><dt>Tries each</dt><dd>{samples}</dd></div>
           </dl>
-        </Section>
+          <div className="nx-main nx-prose">
+            <p className="lede">
+              An agent gets one message, the tools a real operations assistant would have, and a payment system that sometimes tells it something that isn’t true yet.
+              We record every call it makes and grade where the money ended up.
+            </p>
+            <ol className="nx-steps">
+              {HOW_STEPS.map((s) => <li key={s.title}><span><b>{s.title}.</b> {s.body}</span></li>)}
+            </ol>
+          </div>
+        </section>
 
-        <Section title="How a try is graded">
-          <p><strong className="font-medium text-ink">Money</strong> is read from Ledgerline’s own records of what moved, never from what the agent says. A try is right only if the money ended up where it should.</p>
-          <p className="mt-4"><strong className="font-medium text-ink">Truth</strong> checks the reply for specific false claims, like telling a supplier his payment failed when the bank paid it. This check looks for phrases, so it misses some and flags some wrongly. Every flagged reply is read by a person before a number is quoted.</p>
-          <p className="mt-4"><strong className="font-medium text-ink">Every try counts.</strong> Each setup runs {samples} times per model in the latest experiment, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
-        </Section>
+        <section className="nx-row nx-section">
+          <p className="nx-side">01</p>
+          <div className="nx-main nx-prose">
+            <h2>The payment system</h2>
+            <p>Ledgerline is a made-up payment provider. It behaves like real ones in the ways that trip people up, but it is not a copy of any one of them. These are the notes the agent is given about it, word for word:</p>
+            <ul className="nx-mono-list">{notes.map((n) => <li key={n}>{n}</li>)}</ul>
+            <p>Some experiments remove or add one of these lines on purpose. Each experiment page shows the exact instructions for every setup.</p>
+          </div>
+        </section>
 
-        <Section title="What public payment agents are told">
-          <p>Before calling a setup realistic, we read {PUBLIC_PROMPTS.sources} public examples of agents that move money: two benchmarks, starter kits from AI and payment companies, and collections of leaked prompts. How many tell the agent to:</p>
-          <div className="mt-5"><PublicTally /></div>
-          <p className="mt-5">Where duplicate protection exists, it is in code, not in the instructions. These are demos and toolkits, not companies’ live systems.</p>
-        </Section>
+        <section className="nx-row nx-section">
+          <p className="nx-side">02</p>
+          <div className="nx-main nx-prose">
+            <h2>The tools</h2>
+            <p>The agent acts only through these. It decides which to call and when.</p>
+            <dl className="nx-defs">
+              {method.tools.map((t) => <div key={t.name}><dt>{t.name}</dt><dd>{t.description}</dd></div>)}
+            </dl>
+          </div>
+        </section>
 
-        <Section title="Rules we hold ourselves to">
-          <ul className="flex list-disc flex-col gap-2 pl-5">
-            <li>Each experiment’s question and how its results will be read are written down before it runs.</li>
-            <li>Nothing about a setup changes once a run starts. If the grading has a bug, we fix it, grade the finished tries again, and say so.</li>
-            <li>We publish every try, including the ones that make a model look good.</li>
-          </ul>
-        </Section>
-      </article>
-    </main>
-    <Footer />
-    </>
-  );
-}
+        <section className="nx-row nx-section">
+          <p className="nx-side">03</p>
+          <div className="nx-main nx-prose">
+            <h2>The traps</h2>
+            <p>Each trap is a way payments really fail. The agent is never told which one it is in.</p>
+            <dl className="nx-defs nx-defs-wide">
+              {traps.map(([id, s]) => <div key={id}><dt>{s.title}</dt><dd>{s.trap}</dd></div>)}
+            </dl>
+          </div>
+        </section>
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-16 border-t border-line pt-10">
-      <h2 className="text-[28px] leading-tight sm:text-[32px]">{title}</h2>
-      <div className="mt-4 text-[17px] leading-relaxed text-muted">{children}</div>
-    </section>
+        <section className="nx-row nx-section">
+          <p className="nx-side">04</p>
+          <div className="nx-main nx-prose">
+            <h2>How a try is graded</h2>
+            <p><b>Money</b> is read from Ledgerline’s own records of what moved, never from what the agent says. A try is right only if the money ended up where it should.</p>
+            <p><b>Truth</b> checks the reply for specific false claims, like telling a supplier his payment failed when the bank paid it. This check looks for phrases, so it misses some and flags some wrongly. Every flagged reply is read by a person before a number is quoted.</p>
+            <p><b>Every try counts.</b> Each setup runs {samples} times per model, because a model can get it right once and wrong the next time. A business needs an agent that always gets it right.</p>
+          </div>
+        </section>
+        {facts && (
+          <figure className="nx-fig nx-fig-narrow">
+            <Play>
+              <Exhibit facts={facts} setupName={setupName(facts.run.condition)} wrongLabel={exp.wrong} />
+            </Play>
+            <figcaption className="nx-cap"><span className="nx-side">Figure 1</span><span className="nx-main">One try as Ledgerline recorded it: {MODELS[facts.run.model].name}, {setupName(facts.run.condition).toLowerCase()}, try {facts.run.sample}. Graded on money: {facts.run.money.note}.</span></figcaption>
+          </figure>
+        )}
+
+        <section className="nx-row nx-section">
+          <p className="nx-side">05</p>
+          <div className="nx-main nx-prose">
+            <h2>What public payment agents are told</h2>
+            <p>Before calling a setup realistic, we read {PUBLIC_PROMPTS.sources} public examples of agents that move money: two benchmarks, starter kits from AI and payment companies, and collections of leaked prompts. How many tell the agent to:</p>
+          </div>
+        </section>
+        <figure className="nx-fig nx-fig-narrow">
+          <PublicTally />
+          <figcaption className="nx-cap"><span className="nx-side">Figure 2</span><span className="nx-main">One square per example, filled where the instructions say it. Where duplicate protection exists, it is in code, not in the instructions. <a href={`${REPO}/blob/main/docs/public-prompts.md`}>Every source, with the lines quoted</a>.</span></figcaption>
+        </figure>
+
+        <section className="nx-row nx-section nx-end">
+          <p className="nx-side">06</p>
+          <div className="nx-main nx-prose">
+            <h2>Rules we hold ourselves to</h2>
+            <ol className="nx-steps">
+              <li>Each experiment’s question and how its results will be read are written down before it runs.</li>
+              <li>Nothing about a setup changes once a run starts. If the grading has a bug, we fix it, grade the finished tries again, and say so.</li>
+              <li>We publish every try, including the ones that make a model look good.</li>
+            </ol>
+          </div>
+        </section>
+      </main>
+      <Footer wide />
+    </div>
   );
 }

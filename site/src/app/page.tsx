@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Footer } from '@/components/Footer';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { NxHeader } from '@/components/NxHeader';
 import { StepChart } from '@/components/grid/StepChart';
 import { OneSentence } from '@/components/note/OneSentence';
 import { MODELS } from '@/content/models';
@@ -29,15 +29,7 @@ export default function Home() {
 
   return (
     <div className="note nx">
-      <header className="nx-top">
-        <Link href="/" className="note-brand"><span className="intact-mark" aria-hidden />Intact</Link>
-        <nav aria-label="Site">
-          <Link href={`/experiments/${exp.slug}`}>Research</Link>
-          <Link href="/method">Method</Link>
-          <a href={GITHUB}>GitHub</a>
-          <ThemeToggle />
-        </nav>
-      </header>
+      <NxHeader />
 
       <main>
         <section className="nx-row nx-hero">
