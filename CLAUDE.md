@@ -61,11 +61,15 @@ cd site && npm run lint && npx tsc --noEmit -p .
 
 Live at https://intact-bench.vercel.app. The home page was redesigned on 27 November 2026. The other pages still have the older look.
 
-**Home page (`site/src/app/page.tsx`).**
-- **Hero:** "AI agents pay twice. Intact measures it, and stops it."
-- **Hero picture: `TryField`.** Every try of the latest experiment drawn as an isometric block on a canvas, one plate per setup. A try that paid twice is raised and red. All numbers come from the experiment data, never typed in.
-- **Under the hero:** a screenshot of the platform dashboard (`public/img/platform-light.webp` and `platform.webp`, one per theme).
-- **Then:** the benchmark and the platform side by side, the results table, updates, and the closing line.
+**Home page (`site/src/app/page.tsx`).** Rebuilt on 27 November as chapters, each around one visual. Motion explains and plays once; reduced motion shows every end state.
+- **Hero:** "AI agents pay twice. Intact measures it, and stops it." with `TryField` (every try as an isometric block, choreographed so each model's ridge rises as one piece). Takes the first screen.
+- **One payment. Paid twice** (band): Qwen 3.8 27B's no-hint try 2 (`Exhibit`) beside Chidi's bank statement (`TwoRecords`), replaying when reached (`Play`).
+- **How Intact grades it:** `ScrollStory`, steps scrolling beside a pinned stage, from `storyData()` in `lib/exhibit.ts`.
+- **What we found** (band): `Findings` (four big figures) and `Ladder` (every try as a square, rows filling in).
+- **The platform:** `GuardFlow` (four demo payments to the gate), the rules, and the dashboard picture growing into place (`ScrollScale`).
+- **Every try is public,** then the close with the gate mark as an object.
+- The featured try is `exhibit` in `content/experiments.ts`. Every figure is read from the published run.
+- The experiment page uses the same hero pair, ladder and scroll story. Its lower half (beats, try grid, downloads) still has the older single-column layout.
 
 **The look.**
 - **Font:** Google Sans Flex with the roundness axis at 40 (`--font-soft`, set in `layout.tsx`), weight 600 for headings. Geist Mono only for times, counts and small data. The older pages use Inter Tight and Geist.
@@ -78,11 +82,10 @@ Live at https://intact-bench.vercel.app. The home page was redesigned on 27 Nove
 
 ## Next jobs on the site
 
-See the handoff prompt in the latest session, or ask the owner. As of 27 November:
+As of 27 November, after the chapters redesign:
 
-1. **Smooth theme switch.** Swapping the light and dark dashboard images reads as a reload. Crossfade them.
-2. **Subtle motion,** most of all on the try blocks.
-3. **Change the headline tag on the blocks** from gpt-oss-120b to Qwen 3.8 27B (7 of 10, no hint), with the Qwen logo.
-4. **Redesign the experiment page** to match the new home page.
-5. **Use the logo mark as the favicon** and in the header of every page.
-6. **More description on the home page** of what Intact does.
+1. **The experiment page's lower half** in the chapter style (beats, try grid, downloads).
+2. **Platform copy:** say only what the owner has chosen to say in public. Never copy wording from the private repo's plan into this one, not even in a comment.
+3. **The red glow on the hero blocks:** unslop counts coloured glows as a tell. The owner has not decided.
+4. **Design skills** are in `.claude/skills/`: frontend-design (Anthropic, Apache 2.0), emil-design-eng and choreograph (Emil Kowalski, MIT), unslop (CC BY 4.0). Use them in that order, with dataviz for charts.
+5. **Dev server note:** Turbopack's Tailwind loader can keep serving old CSS. Restart `next dev` with `.next/dev` removed after CSS edits, and never run `next build` beside a running dev server.
