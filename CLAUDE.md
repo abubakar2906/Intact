@@ -51,8 +51,7 @@ cd site && npm run lint && npx tsc --noEmit -p .
 ## Where the runs are (27 November 2026)
 
 - **Experiment 01, the stale payout.** Published. 5 open models, 10 tries each, 4 setups. Paid twice: no hint 29/50, a note in the docs 23/50, one sentence 1/50, a lock in the tool 0/49.
-- **Pushback run** (the supplier insists after the agent holds off). Groq half published (`results/probe-2026-11-26T09-57-02-insist-groq`, 80 tries). The NVIDIA half is in `runs/probe-2026-11-26T09-57-33`: GLM has 30 tries left and its endpoint was down. Resume with `--resume`.
-  - Exploratory finding, not written up yet: of the agents that held off and reached the pushback, the share that then paid anyway was TAU 9/37, STRIPE 7/36, one sentence 6/38, no hint 1/13. Rules in the prompt make agents stop, then many give in. Write it into `PLAN.md`, the site and the updates list when the owner asks.
+- **Experiment 02, the supplier pushes back.** Published 28 November (`/experiments/pushback`), all 200 tries: `results/probe-2026-11-26T09-57-02-insist-groq` and `results/probe-2026-11-26T09-57-33-insist-nvidia`. With no hint, 38 of 50 paid twice. Under the three rules (τ-bench, Stripe, one sentence) almost no agent paid straight away, but of those that held off and reached the pushback, 23 of 143 then paid anyway (about 1 in 6): τ-bench 9 of 49, Stripe 8 of 46, one sentence 6 of 48.
 - **Kimi recheck:** 4/10 on the same setup it scored 2 and 7 on before. The swing is chance. Noted in `PLAN.md`.
 - **Gemini free-tier run:** `runs/probe-2026-11-26T14-05-04`, 8 of 80 done. The free tier allows 20 requests a day per model. Gemini is not in the tool-call rankings, so stopping it is the recommendation; the owner has not decided.
 - **Third run** (the models agents actually run on, Opus as the ceiling): planned in `PLAN.md`, waiting on credits. When a key arrives it goes in as a network secret. Run one test try per model first.
