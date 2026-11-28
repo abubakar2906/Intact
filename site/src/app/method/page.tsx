@@ -21,7 +21,8 @@ export default function MethodPage() {
   const pushes = Object.entries(method.scenarios).filter(([, x]) => x.followUp);
   const facts = exhibitFacts(exp, data);
   const setupName = (id: string) => exp.setups.find((s) => s.id === id)?.name ?? id;
-  const setups = [...new Map(experiments.flatMap((e) => e.setups).map((s) => [s.id, s])).values()];
+  // Experiment 02's LOCK is experiment 01's lock (D) under another id, so setups are merged by name.
+  const setups = [...new Map(experiments.flatMap((e) => e.setups).map((s) => [s.name, s])).values()];
 
   return (
     <div className="lab">
