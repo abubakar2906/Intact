@@ -28,6 +28,15 @@ const REPO = 'https://github.com/abubakar2906/Intact';
 
 // One experiment, in full: the result as a live chart, the evidence, what it means, every try, and the setup.
 // Every figure and count is read from the published runs.
+// A results folder ends in its provider. When two runs share a provider, the run's date tells them apart.
+function runLabel(folder: string, all: string[]) {
+  const provider = folder.split('-').pop()!;
+  if (all.filter((f) => f.endsWith(`-${provider}`)).length < 2) return `${provider} run`;
+  const [, , m, d] = folder.match(/(\d{4})-(\d{2})-(\d{2})/) ?? [];
+  const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(m) - 1];
+  return `${provider} run, ${Number(d)} ${month}`;
+}
+
 export default async function ExperimentPage({ params }: PageProps<'/experiments/[slug]'>) {
   const { slug } = await params;
   const exp = getExperiment(slug);
@@ -123,10 +132,10 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
             <div style={{ marginTop: 40 }}>
               <TryGrid models={rankModels(exp, data)} setups={exp.setups.map((x) => ({ id: x.id, name: x.name }))} tries={data.tries} wrongLabel={exp.wrong} />
             </div>
-            <details className="lab-details"><summary>The counts as a table</summary><ResultsTable exp={exp} data={data} /></details>
+            <div className="lab-table"><ResultsTable exp={exp} data={data} /></div>
             <div className="lab-pills">
               <a href={`/data/intact-${exp.slug}.csv`} download>CSV, one row per try</a>
-              {data.folders.map((x) => <a key={x} href={`${REPO}/tree/main/results/${x}`}>Transcripts, {x.split('-').pop()} run</a>)}
+              {data.folders.map((x) => <a key={x} href={`${REPO}/tree/main/results/${x}`}>Transcripts, {runLabel(x, data.folders)}</a>)}
             </div>
           </section>
 

@@ -1205,6 +1205,9 @@ h1, h2, h3 {
 .lab-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .lab-pills a { border: 1px solid var(--l-line); border-radius: 9px; padding: 8px 14px; font-size: 15px; transition: border-color 150ms var(--l-ease); }
 .lab-pills a:hover { border-color: var(--l-ink); }
+.lab-table { margin-top: 48px; }
+.lab-table th { white-space: nowrap; }
+.lab-table th + th, .lab-table td + td { padding-left: 24px; }
 .lab-cite { font-family: var(--font-geist-mono), monospace; font-size: 13px; color: var(--l-ink-2); background: var(--l-wash); border-radius: 8px; padding: 14px 16px; margin-top: 16px; max-width: 780px; }
 
 @media (max-width: 860px) {
@@ -1212,6 +1215,7 @@ h1, h2, h3 {
   .lab-row, .lab-chart-top, .lab-cap, .lab-chat { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .lab-cap { gap: 4px; } .lab-cap > span:empty { display: none; }
   .lab-hero .lab-row { gap: 24px; }
+  .lab-table { margin-top: 32px; } .lab-table table { min-width: 680px; } .lab-table th, .lab-table td:first-child { white-space: nowrap; }
   .lab-hero { padding-top: 48px; } .lab-hero .lab-facts { margin-bottom: 24px; }
   .lab-part { padding-top: 72px; }
   .lab-cols, .lab-cards, .lab-records, .lab-list, .lab-ticks, .lab-chat { margin-top: 32px; }
