@@ -17,7 +17,9 @@ export default function Home() {
   const pushData = push ? getExperimentData(push.slug) : null;
   const t1 = (id: string) => firstData.totals[id];
   const sentence = push && pushData ? phaseTotals(push, pushData, 'C') : null;
-  const caveAll = push && pushData ? push.setups.slice(1).map((s) => phaseTotals(push, pushData, s.id)!).reduce((a, p) => ({ cave: a.cave + p.cave, reached: a.reached + p.reached }), { cave: 0, reached: 0 }) : null;
+  const RULES = ['TAU', 'STRIPE', 'C'];
+  const lock2 = push && pushData && push.setups.some((s) => s.id === 'LOCK2') ? phaseTotals(push, pushData, 'LOCK2') : null;
+  const caveAll = push && pushData ? push.setups.filter((s) => RULES.includes(s.id)).map((s) => phaseTotals(push, pushData, s.id)!).reduce((a, p) => ({ cave: a.cave + p.cave, reached: a.reached + p.reached }), { cave: 0, reached: 0 }) : null;
   const tries = experiments.reduce((n, e) => n + getExperimentData(e.slug).runCount, 0);
 
   return (
@@ -69,7 +71,7 @@ export default function Home() {
                 <span className="lab-f">{t1('C').wrong}<small>of {t1('C').n} paid twice when nobody argued</small></span>
                 {sentence && <span className="lab-f is-red">{sentence.cave}<small>of {sentence.reached} gave in once the supplier pushed back</small></span>}
               </div></div>
-              <div><p className="lab-side">A lock in the tool</p><div className="lab-figs"><span className="lab-f">{t1('D').wrong}<small>of {t1('D').n} paid twice. The tool refuses a repeat until the first payment is checked.</small></span></div></div>
+              <div><p className="lab-side">A lock in the tool</p><div className="lab-figs"><span className="lab-f">{t1('D').wrong}<small>of {t1('D').n} paid twice when nobody argued</small></span>{lock2 && <span className="lab-f">{lock2.now + lock2.cave}<small>of {lock2.n} once he pushed back, with a lock that reads the bank’s answer</small></span>}</div></div>
             </div>
             <div className="lab-shot">
               {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,0 +1,14 @@
+{
+  "models": [
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b"
+  ],
+  "scenarios": [
+    "stale-failed-insist"
+  ],
+  "samples": 10,
+  "conditions": [
+    "LOCK",
+    "LOCK2"
+  ]
+}

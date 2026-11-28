@@ -107,7 +107,7 @@ export default async function ExperimentPage({ params }: PageProps<'/experiments
           </section>
 
           {ticks && (() => {
-            const rules = exp.setups.slice(1).map((x) => ({ x, p: phaseTotals(exp, data, x.id)! }));
+            const rules = exp.setups.slice(1).filter((x) => !x.id.startsWith('LOCK')).map((x) => ({ x, p: phaseTotals(exp, data, x.id)! }));
             return (
               <section className="lab-part">
                 <div className="lab-row"><p className="lab-side">{s()}</p><div className="lab-prose"><h2>Under each rule</h2><p>Of the tries that held off and reached the pushback, how many then paid.</p></div></div>
