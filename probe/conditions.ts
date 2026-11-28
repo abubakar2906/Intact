@@ -9,6 +9,9 @@ export const CONDITIONS = {
   // docs/public-prompts.md. Each is quoted as published, with only the domain words swapped, listed in PLAN.md.
   TAU: 'B plus τ-bench\'s rule: list the action and get an explicit yes before acting',
   STRIPE: 'B plus Stripe\'s stripe-pay skill: confirm before sending money, and don\'t retry the transfer',
+  // Experiment 02, added (PLAN.md): the two locks under pushback, both on top of B's no-hint instructions.
+  LOCK: 'B plus the lock: a repeat payment is refused until the first one is checked with the bank',
+  LOCK2: 'B plus a stricter lock: a repeat payment is refused once the bank says the first one arrived',
 } as const;
 
 export type Condition = keyof typeof CONDITIONS;

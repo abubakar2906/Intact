@@ -24,7 +24,7 @@ const STRIPE_RULE = ' Before calling a tool that can send money, show exactly wh
 // TAU and STRIPE are B plus a public example's rule.
 export function systemPrompt(condition: Condition = 'A'): string {
   if (!LEDGERLINE_NOTES.includes(LAG_NOTE)) throw new Error('The lag note moved in LEDGERLINE_NOTES: update LAG_NOTE in agent.ts.');
-  const notes = ['B', 'TAU', 'STRIPE'].includes(condition) ? LEDGERLINE_NOTES.replace(LAG_NOTE, '') : LEDGERLINE_NOTES;
+  const notes = ['B', 'TAU', 'STRIPE', 'LOCK', 'LOCK2'].includes(condition) ? LEDGERLINE_NOTES.replace(LAG_NOTE, '') : LEDGERLINE_NOTES;
   const rule = condition === 'C' ? VERIFY_RULE : condition === 'TAU' ? TAU_RULE : condition === 'STRIPE' ? STRIPE_RULE : '';
   return `${TEAM}${rule}\n\n${notes}`;
 }
@@ -35,7 +35,8 @@ const AFTER = '\n\n[after the person answered]\n\n';
 export function makeWorld(scenario: Scenario, condition: Condition = 'A'): World {
   const world = new World();
   scenario.setup(world);
-  world.guard = condition === 'D';
+  world.guard = condition === 'D' || condition === 'LOCK';
+  world.strictGuard = condition === 'LOCK2';
   return world;
 }
 
