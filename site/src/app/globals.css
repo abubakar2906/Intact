@@ -1212,6 +1212,7 @@ h1, h2, h3 {
   .lab-row, .lab-chart-top, .lab-cap, .lab-chat { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .lab-cap { gap: 4px; } .lab-cap > span:empty { display: none; }
   .lab-hero .lab-row { gap: 24px; }
+  .lab-hero { padding-top: 48px; } .lab-hero .lab-facts { margin-bottom: 24px; }
   .lab-part { padding-top: 72px; }
   .lab-cols, .lab-cards, .lab-records, .lab-list, .lab-ticks, .lab-chat { margin-top: 32px; }
   .lab-shot { margin-top: 32px; border-radius: 10px; }
